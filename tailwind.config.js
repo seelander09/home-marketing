@@ -1,42 +1,63 @@
+﻿const defaultTheme = require('tailwindcss/defaultTheme')
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    './pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './components/**/*.{js,ts,jsx,tsx,mdx}',
     './app/**/*.{js,ts,jsx,tsx,mdx}',
+    './components/**/*.{js,ts,jsx,tsx,mdx}',
+    './stories/**/*.{js,ts,jsx,tsx,mdx}',
+    './cms/**/*.{js,ts,jsx,tsx,mdx}'
   ],
   theme: {
+    container: {
+      center: true,
+      padding: {
+        DEFAULT: '1.5rem',
+        lg: '3rem',
+        '2xl': '5rem'
+      }
+    },
     extend: {
       colors: {
-        primary: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-          800: '#075985',
-          900: '#0c4a6e',
+        brand: {
+          turquoise: 'rgb(var(--color-brand-turquoise) / <alpha-value>)',
+          orange: 'rgb(var(--color-brand-orange) / <alpha-value>)',
+          navy: 'rgb(var(--color-brand-navy) / <alpha-value>)',
+          midnight: 'rgb(var(--color-brand-midnight) / <alpha-value>)',
+          sand: 'rgb(var(--color-brand-sand) / <alpha-value>)'
         },
-        secondary: {
-          50: '#f8fafc',
-          100: '#f1f5f9',
-          200: '#e2e8f0',
-          300: '#cbd5e1',
-          400: '#94a3b8',
-          500: '#64748b',
-          600: '#475569',
-          700: '#334155',
-          800: '#1e293b',
-          900: '#0f172a',
+        surface: {
+          DEFAULT: 'rgb(var(--color-surface-base) / <alpha-value>)',
+          subtle: 'rgb(var(--color-surface-subtle) / <alpha-value>)',
+          strong: 'rgb(var(--color-surface-strong) / <alpha-value>)'
         },
+        stroke: {
+          DEFAULT: 'rgb(var(--color-stroke-default) / <alpha-value>)',
+          strong: 'rgb(var(--color-stroke-strong) / <alpha-value>)'
+        }
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-sans)', ...defaultTheme.fontFamily.sans],
+        display: ['var(--font-display)', ...defaultTheme.fontFamily.sans]
       },
-    },
+      borderRadius: {
+        xl: '1.5rem'
+      },
+      boxShadow: {
+        focus: '0 0 0 4px rgb(var(--color-brand-turquoise) / 0.2)',
+        card: '0 30px 60px -40px rgba(5, 27, 53, 0.35)'
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: 0, transform: 'translateY(10px)' },
+          '100%': { opacity: 1, transform: 'translateY(0)' }
+        }
+      },
+      animation: {
+        fadeIn: 'fadeIn 0.6s ease-out forwards'
+      }
+    }
   },
-  plugins: [],
+  plugins: [require('@tailwindcss/forms')],
+  safelist: ['bg-brand-turquoise', 'bg-brand-orange', 'text-brand-navy']
 }

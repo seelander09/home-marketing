@@ -1,0 +1,18 @@
+﻿{
+  "seo": {
+    "title": "Connect with SmartLead Marketing",
+    "description": "Request a demo, unlock your territory, or ask compliance questions. The SmartLead team is here to help."
+  },
+  "hero": {
+    "eyebrow": "Talk to our strategists",
+    "heading": "Let's build your next seller pipeline",
+    "subheading": "Share your goals and territory. We'll show you how SmartLead delivers motivated seller conversations in weeks, not months.",
+    "primaryCta": { "label": "Request demo", "href": "#demo" },
+    "secondaryCta": { "label": "Do Not Sell my Info", "href": "#do-not-sell", "variant": "ghost" }
+  },
+  "faqs": [
+    { "question": "How fast can we launch?", "answer": "Most teams launch their first campaigns within 21 days, including strategy session and creative approvals." },
+    { "question": "Can we co-brand with partners?", "answer": "Yes. We support co-marketing with mortgage, insurance, and home service partners while maintaining compliance." }
+  ],
+  "partnerPortalCta": { "label": "Access partner portal", "href": "/partner" }
+}

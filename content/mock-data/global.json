@@ -1,0 +1,79 @@
+﻿{
+    "seo":  {
+                "title":  "SmartLead Marketing",
+                "description":  "Predictive real estate marketing platform built for agents and brokerages.",
+                "keywords":  [
+                                 "predictive analytics",
+                                 "real estate marketing",
+                                 "lead generation"
+                             ]
+            },
+    "navigation":  [
+                       {
+                           "label":  "Home",
+                           "href":  "/"
+                       },
+                       {
+                           "label":  "Products",
+                           "href":  "/products"
+                       },
+                       {
+                           "label":  "Resources",
+                           "href":  "/resources"
+                       },
+                       {
+                           "label":  "About",
+                           "href":  "/about"
+                       },
+                       {
+                           "label":  "Contact",
+                           "href":  "/contact"
+                       },
+                       {
+                           "href":  "/analytics/dashboard",
+                           "label":  "Analytics"
+                       },
+                       {
+                           "href":  "/compliance/resources",
+                           "label":  "Compliance"
+                       }
+                   ],
+    "primaryCta":  {
+                       "label":  "Request a Demo",
+                       "href":  "/contact#demo",
+                       "variant":  "primary"
+                   },
+    "footer":  {
+                   "headline":  "Ready to own your market?",
+                   "description":  "Partner with SmartLead Marketing to unlock seller-ready listings before your competition even knocks.",
+                   "cta":  {
+                               "label":  "Schedule a demo",
+                               "href":  "/contact#demo",
+                               "variant":  "primary"
+                           },
+                   "social":  [
+                                  {
+                                      "label":  "LinkedIn",
+                                      "href":  "https://www.linkedin.com/company/smartlead-marketing"
+                                  },
+                                  {
+                                      "label":  "YouTube",
+                                      "href":  "https://www.youtube.com/@smartleadmarketing"
+                                  }
+                              ],
+                   "legal":  [
+                                 {
+                                     "label":  "Privacy Policy",
+                                     "href":  "/privacy"
+                                 },
+                                 {
+                                     "label":  "Terms of Service",
+                                     "href":  "/terms"
+                                 },
+                                 {
+                                     "label":  "Do Not Sell My Info",
+                                     "href":  "/contact#do-not-sell"
+                                 }
+                             ]
+               }
+}

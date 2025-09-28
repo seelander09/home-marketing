@@ -1,0 +1,32 @@
+﻿[
+  {
+    "title": "The 2025 seller intelligence report",
+    "slug": "2025-seller-intelligence-report",
+    "category": "Download",
+    "description": "Discover which homeowner behaviors predict listings in 2025 and how to activate them.",
+    "image": "/images/resources/resource-4.svg",
+    "publishDate": "2025-08-01",
+    "readingTime": "15 min",
+    "body": "<h2>Inside the 2025 Seller Intelligence Report</h2><ul><li>The three data signals that forecast listings with 92% accuracy.</li><li>Territory heat maps to plan budget by micro-market.</li><li>Playbooks for activating high propensity sellers across channels.</li></ul>"
+  },
+  {
+    "title": "Three nurture flows that convert seller leads",
+    "slug": "nurture-flows-seller-leads",
+    "category": "Blog",
+    "description": "Automated sequences proven to move homeowners from interest to appointment.",
+    "image": "/images/resources/resource-5.svg",
+    "publishDate": "2025-07-18",
+    "readingTime": "6 min",
+    "body": "<h3>Flow 1: Hyper-local welcome</h3><p>Send three touches within the first week referencing local market stats.</p>"
+  },
+  {
+    "title": "SmartLead x HubSpot integration guide",
+    "slug": "smartlead-hubspot-integration",
+    "category": "Download",
+    "description": "Step-by-step workbook to sync SmartLead campaigns to HubSpot workflows.",
+    "image": "/images/resources/resource-6.svg",
+    "publishDate": "2025-06-30",
+    "readingTime": "10 min",
+    "body": "<h3>Mapping SmartLead to HubSpot</h3><p>Use deal stages to trigger nurture actions and set up closed-loop attribution.</p>"
+  }
+]

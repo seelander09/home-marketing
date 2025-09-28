@@ -1,0 +1,45 @@
+﻿{
+  "seo": {
+    "title": "Resources | SmartLead Marketing",
+    "description": "Guides, blog posts, and webinars designed to help real estate professionals dominate their territories."
+  },
+  "featured": {
+    "title": "The 2025 seller intelligence report",
+    "slug": "2025-seller-intelligence-report",
+    "category": "Download",
+    "description": "Discover which homeowner behaviors predict listings in 2025 and how to activate them.",
+    "image": "/images/resources/resource-4.svg",
+    "publishDate": "2025-08-01",
+    "readingTime": "15 min"
+  },
+  "categories": ["All", "Blog", "Download", "Webinar", "News"],
+  "posts": [
+    {
+      "title": "Three nurture flows that convert seller leads",
+      "slug": "nurture-flows-seller-leads",
+      "category": "Blog",
+      "description": "Automated sequences proven to move homeowners from interest to appointment.",
+      "image": "/images/resources/resource-5.svg",
+      "publishDate": "2025-07-18",
+      "readingTime": "6 min"
+    },
+    {
+      "title": "SmartLead x HubSpot integration guide",
+      "slug": "smartlead-hubspot-integration",
+      "category": "Download",
+      "description": "Step-by-step workbook to sync SmartLead campaigns to HubSpot workflows.",
+      "image": "/images/resources/resource-6.svg",
+      "publishDate": "2025-06-30",
+      "readingTime": "10 min"
+    },
+    {
+      "title": "Live demo: Predictive listing intelligence",
+      "slug": "live-demo-predictive-listing-intelligence",
+      "category": "Webinar",
+      "description": "See how SmartLead surfaces homeowners most likely to sell in your market.",
+      "image": "/images/resources/resource-7.svg",
+      "publishDate": "2025-09-10",
+      "readingTime": "50 min"
+    }
+  ]
+}

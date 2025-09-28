@@ -1,0 +1,6 @@
+﻿<svg xmlns='http://www.w3.org/2000/svg' width='320' height='240' viewBox='0 0 320 240'>
+  <rect width='320' height='240' rx='28' fill='#0badd5'/>
+  <circle cx='160' cy='100' r='60' fill='#051B35'/>
+  <rect x='60' y='160' width='200' height='60' rx='24' fill='#051B35'/>
+  <text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Nunito, Arial, sans-serif' font-size='44' fill='#FFFFFF' font-weight='700'>SL</text>
+</svg>

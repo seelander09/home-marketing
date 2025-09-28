@@ -1,0 +1,130 @@
+﻿{
+  "seo": {
+    "title": "SmartLead Products",
+    "description": "From predictive SmartTargeting to always-on omnichannel Reach campaigns, pick the package tailored to your growth goals."
+  },
+  "overview": {
+    "eyebrow": "Product Suite",
+    "heading": "A unified platform from territory intelligence to omnichannel execution",
+    "subheading": "SmartLead combines AI-powered seller scoring with turnkey campaigns that keep you in front of homeowners until they list.",
+    "primaryCta": { "label": "Compare plans", "href": "#packages", "variant": "primary" },
+    "secondaryCta": { "label": "Watch platform tour", "href": "/resources/platform-tour", "variant": "secondary" }
+  },
+  "packages": [
+    {
+      "name": "SmartTargeting",
+      "description": "Predictive seller intelligence with dynamic territory scoring and prospect data enrichment.",
+      "priceHint": "Starting at /mo",
+      "features": [
+        "Weekly seller intent refresh",
+        "Exclusive territory protection",
+        "Owner contact data & enrichment",
+        "Automated lead routing to CRM"
+      ],
+      "cta": { "label": "Unlock my territory", "href": "/contact#territory" }
+    },
+    {
+      "name": "Reach Omnichannel",
+      "description": "Done-for-you direct mail, digital, and social campaigns orchestrated from one command center.",
+      "priceHint": "Starting at ,299/mo",
+      "features": [
+        "Sequenced direct mail and digital retargeting",
+        "CTV and social ads with agent branding",
+        "Campaign calendar with optimization alerts",
+        "Call tracking & response scoring"
+      ],
+      "cta": { "label": "Schedule a Reach consult", "href": "/contact#demo" }
+    },
+    {
+      "name": "Insights+",
+      "description": "Advanced analytics, attribution, and AI-coach for brokerages scaling across markets.",
+      "priceHint": "Custom enterprise pricing",
+      "features": [
+        "Brokerage-level dashboards & benchmarking",
+        "Salesforce and HubSpot native integrations",
+        "AI-powered call summaries & next-best-action",
+        "Multi-market governance & compliance tooling"
+      ],
+      "cta": { "label": "Talk to sales", "href": "/contact#enterprise" }
+    }
+  ],
+  "playbooks": [
+    {
+      "title": "Territory Intelligence Workshop",
+      "description": "Kick-off session to model your best-fit territories with SmartLead strategists.",
+      "icon": "compass"
+    },
+    {
+      "title": "Omnichannel Launch Sprint",
+      "description": "Two-week launch plan to deploy direct mail, social, and retargeting campaigns.",
+      "icon": "rocket"
+    },
+    {
+      "title": "Conversion Optimization Lab",
+      "description": "Quarterly reviews to optimize nurture flows and CRM automations.",
+      "icon": "lab"
+    }
+  ],
+  "integrations": [
+    "HubSpot",
+    "Salesforce",
+    "Follow Up Boss",
+    "BoomTown",
+    "Chime",
+    "Zapier"
+  ],
+  "testimonials": [
+    {
+      "quote": "The Reach team handles everything from creative to attribution. My agents focus on conversations, not campaign logistics.",
+      "author": "Marcos Alvarez",
+      "role": "Broker/Owner, Alvarez Realty Group",
+      "avatar": "/images/testimonials/marcos-alvarez.jpg",
+      "companyLogo": "/images/logos/alvarez.svg"
+    }
+  ],
+  "dashboard": {
+    "headline": "Real-time attribution dashboard",
+    "subheadline": "Every plan includes a Looker Studio dashboard with territory heat maps, funnel conversion, and campaign ROI.",
+    "widgets": [
+      {
+        "title": "Pipeline influence",
+        "description": "Closed and forecasted listings by channel",
+        "chartType": "bar",
+        "labels": ["Direct Mail", "Paid Social", "CTV", "Retargeting"],
+        "dataset": [
+          {
+            "label": "Influenced Volume",
+            "data": [2.3, 1.6, 1.1, 0.8],
+            "backgroundColor": ["#0BADD5", "#FF564F", "#051B35", "#4DD4AC"]
+          }
+        ]
+      },
+      {
+        "title": "Demo requests",
+        "description": "Weekly demo requests from SmartLead campaigns",
+        "chartType": "line",
+        "labels": ["Week 1", "Week 2", "Week 3", "Week 4"],
+        "dataset": [
+          {
+            "label": "Demo requests",
+            "data": [14, 19, 25, 31],
+            "backgroundColor": ["#0BADD5"]
+          }
+        ]
+      },
+      {
+        "title": "Lead quality mix",
+        "description": "Share of leads by seller readiness stage",
+        "chartType": "doughnut",
+        "labels": ["Hot", "Warm", "Nurture"],
+        "dataset": [
+          {
+            "label": "Lead mix",
+            "data": [42, 33, 25],
+            "backgroundColor": ["#FF564F", "#0BADD5", "#4DD4AC"]
+          }
+        ]
+      }
+    ]
+  }
+}

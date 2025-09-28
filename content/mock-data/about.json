@@ -1,0 +1,61 @@
+﻿{
+  "seo": {
+    "title": "About SmartLead Marketing",
+    "description": "Meet the team helping real estate professionals predict and win the next listing."
+  },
+  "story": {
+    "heading": "We believe the next listing is predictable",
+    "body": "SmartLead Marketing was founded by data scientists and real estate operators who saw first-hand how difficult it is to stay in front of homeowners ready to sell. We built SmartLead so agents and brokerages could combine predictive intelligence with turnkey campaigns in one platform.",
+    "stats": [
+      { "label": "Homes influenced", "value": 42000 },
+      { "label": "Markets served", "value": 180 },
+      { "label": "CRM integrations", "value": 42 }
+    ]
+  },
+  "leadership": [
+    {
+      "name": "Sierra Bennett",
+      "title": "Chief Executive Officer",
+      "bio": "Former broker-owner who scaled a top-5 market team using predictive analytics.",
+      "image": "/images/team/team-1.svg"
+    },
+    {
+      "name": "Leon Wu",
+      "title": "Chief Product Officer",
+      "bio": "Data scientist previously leading SmartZip's scoring models.",
+      "image": "/images/team/team-2.svg"
+    },
+    {
+      "name": "Monica Alvarez",
+      "title": "VP, Customer Experience",
+      "bio": "Helps brokerages activate SmartLead playbooks and reach adoption across teams.",
+      "image": "/images/team/team-3.svg"
+    }
+  ],
+  "testimonials": [
+    {
+      "quote": "SmartLead is the strategic partner our brokerage needed to stay ahead in low-inventory markets.",
+      "author": "Tanya Reed",
+      "role": "Broker, Skyline Realty",
+      "avatar": "/images/testimonials/avatar-3.svg",
+      "companyLogo": "/images/logos/company-3.svg"
+    }
+  ],
+  "values": [
+    {
+      "title": "Outcomes first",
+      "description": "We measure success by listings won and territories growing.",
+      "icon": "target"
+    },
+    {
+      "title": "Whole-team enablement",
+      "description": "From agents to marketing directors, we ensure adoption and enablement across every role.",
+      "icon": "people"
+    },
+    {
+      "title": "Transparency and trust",
+      "description": "Clear reporting, data governance, and consent-first marketing.",
+      "icon": "shield"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+﻿<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='630' viewBox='0 0 1200 630'>
+  <defs>
+    <linearGradient id='og-gradient' x1='0%' y1='0%' x2='100%' y2='100%'>
+      <stop offset='0%' stop-color='#051B35'/>
+      <stop offset='100%' stop-color='#0badd5'/>
+    </linearGradient>
+  </defs>
+  <rect width='1200' height='630' fill='url(#og-gradient)' rx='48'/>
+  <text x='50%' y='52%' dominant-baseline='middle' text-anchor='middle' font-family='Nunito, Arial, sans-serif' font-size='96' fill='#FFFFFF' font-weight='700'>SmartLead</text>
+  <text x='50%' y='62%' dominant-baseline='middle' text-anchor='middle' font-family='Nunito, Arial, sans-serif' font-size='36' fill='#FFFFFF' opacity='0.85'>Predictive Real Estate Marketing</text>
+</svg>

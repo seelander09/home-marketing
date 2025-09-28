@@ -1,0 +1,13 @@
+﻿<svg xmlns='http://www.w3.org/2000/svg' width='1440' height='600' viewBox='0 0 1440 600'>
+  <defs>
+    <linearGradient id='hero-gradient' x1='0%' y1='0%' x2='100%' y2='100%'>
+      <stop offset='0%' stop-color='#051B35'/>
+      <stop offset='100%' stop-color='#0badd5'/>
+    </linearGradient>
+  </defs>
+  <rect width='1440' height='600' fill='url(#hero-gradient)'/>
+  <circle cx='360' cy='180' r='180' fill='rgba(255, 86, 79, 0.35)'/>
+  <circle cx='1080' cy='420' r='220' fill='rgba(11, 173, 213, 0.35)'/>
+  <text x='50%' y='45%' dominant-baseline='middle' text-anchor='middle' font-family='Nunito, Arial, sans-serif' font-size='80' fill='#FFFFFF' font-weight='700'>SMARTLEAD</text>
+  <text x='50%' y='58%' dominant-baseline='middle' text-anchor='middle' font-family='Nunito, Arial, sans-serif' font-size='32' fill='#FFFFFF' opacity='0.85'>Product Overview</text>
+</svg>

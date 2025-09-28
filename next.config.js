@@ -1,17 +1,25 @@
-/** @type {import('next').NextConfig} */
+﻿/** @type {import('next').NextConfig} */
 const nextConfig = {
+  reactStrictMode: true,
   experimental: {
-    appDir: true,
+    typedRoutes: true
   },
   images: {
-    domains: ['images.unsplash.com', 'via.placeholder.com'],
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com'
+      }
+    ]
   },
   typescript: {
-    ignoreBuildErrors: false,
+    ignoreBuildErrors: false
   },
   eslint: {
-    ignoreDuringBuilds: false,
-  },
+    ignoreDuringBuilds: false
+  }
 }
 
 module.exports = nextConfig

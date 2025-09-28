@@ -1,29 +1,87 @@
+@import 'leaflet/dist/leaflet.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+:root {
+  --color-brand-turquoise: 11 173 213;
+  --color-brand-orange: 255 86 79;
+  --color-brand-navy: 5 27 53;
+  --color-brand-midnight: 2 17 36;
+  --color-brand-sand: 240 245 248;
+  --color-surface-base: 255 255 255;
+  --color-surface-subtle: 244 248 252;
+  --color-surface-strong: 12 27 55;
+  --color-stroke-default: 226 232 240;
+  --color-stroke-strong: 15 23 42;
+  --shadow-color: 5 27 53;
+}
+
+.dark {
+  --color-surface-base: 8 16 32;
+  --color-surface-subtle: 12 24 48;
+  --color-surface-strong: 248 250 252;
+  --color-stroke-default: 30 41 59;
+}
 
 @layer base {
-  html {
-    font-family: 'Inter', system-ui, sans-serif;
+  *, *::before, *::after {
+    @apply border-stroke;
   }
-  
+
+  html {
+    @apply scroll-smooth;
+  }
+
   body {
-    @apply bg-white text-gray-900;
+    font-family: var(--font-sans);
+    @apply bg-surface text-brand-midnight antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    @apply text-brand-navy tracking-tight;
+  }
+
+  a {
+    @apply text-brand-turquoise transition-colors hover:text-brand-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-turquoise;
   }
 }
 
 @layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-base font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-turquoise;
+  }
+
   .btn-primary {
-    @apply bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+    @apply btn bg-brand-turquoise text-white shadow-lg shadow-brand-navy/10 hover:bg-brand-orange;
   }
-  
+
   .btn-secondary {
-    @apply bg-secondary-100 hover:bg-secondary-200 text-secondary-800 font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+    @apply btn border border-stroke bg-white text-brand-navy hover:border-brand-turquoise hover:text-brand-turquoise;
   }
-  
-  .container {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+
+  .section {
+    @apply py-20 sm:py-24;
+  }
+
+  .gradient-hero {
+    background: radial-gradient(circle at 15% 20%, rgba(11, 173, 213, 0.35), transparent 55%),
+      radial-gradient(circle at 85% 15%, rgba(255, 86, 79, 0.35), transparent 50%),
+      linear-gradient(160deg, rgba(5, 27, 53, 1) 0%, rgba(5, 27, 53, 0.88) 65%, rgba(2, 17, 36, 0.8) 100%);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .shadow-card {
+    box-shadow: 0 30px 60px -40px rgba(var(--shadow-color), 0.35);
+  }
+
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-turquoise;
   }
 }
