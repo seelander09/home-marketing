@@ -1,242 +1,413 @@
 ﻿{
-  "seo": {
-    "title": "Unlock listing-ready leads with SmartLead Marketing",
-    "description": "Predictive real estate marketing platform delivering seller-ready leads, automated nurture, and measurable ROI.",
-    "keywords": ["real estate leads", "predictive analytics", "smartzip alternative"]
-  },
-  "hero": {
-    "eyebrow": "Predictive Seller Intelligence",
-    "heading": "Own the listings before anyone else does",
-    "subheading": "Pinpoint homeowners most likely to sell, launch multi-channel campaigns in minutes, and hand off marketing-qualified opportunities automatically to your CRM.",
-    "primaryCta": { "label": "See SmartTargeting live", "href": "/contact#demo", "variant": "primary" },
-    "secondaryCta": { "label": "Download the 2025 Seller Playbook", "href": "/resources/2025-seller-playbook", "variant": "secondary" },
-    "video": { "provider": "vimeo", "id": "912345678", "thumbnail": "/images/placeholders/hero-video-poster.svg" }
-  },
-  "metrics": [
-    { "label": "Seller intent accuracy", "value": 92, "suffix": "%", "description": "Validated by third-party data partners" },
-    { "label": "Pipeline lift", "value": 5, "suffix": "x", "description": "Average increase for top territories" },
-    { "label": "Campaign launch time", "value": 12, "suffix": "min", "description": "From login to omnichannel outreach" }
-  ],
-  "logos": [
-    "/images/logos/logo-1.svg",
-    "/images/logos/logo-2.svg",
-    "/images/logos/logo-3.svg",
-    "/images/logos/logo-4.svg",
-    "/images/logos/logo-5.svg"
-  ],
-  "features": [
-    {
-      "title": "Predict exactly who will list",
-      "description": "Proprietary AI combines 300+ behavioral and property signals to score every homeowner in your territory.",
-      "icon": "target",
-      "bullets": [
-        "Dynamic territory scoring refreshed weekly",
-        "Seller watchlists with instant alerts",
-        "Segment by equity, tenure, and lifestyle"
-      ]
-    },
-    {
-      "title": "Launch omnichannel in one click",
-      "description": "Direct mail, email, social, and connected TV campaigns orchestrated from a single playbook.",
-      "icon": "spark",
-      "bullets": [
-        "Pre-built campaigns proven to convert",
-        "Marketing calendar synced to your CRM",
-        "Co-branded partner templates included"
-      ]
-    },
-    {
-      "title": "Automate nurture to appointment",
-      "description": "Lead routing, task automation, and engagement scoring connect seamlessly with your CRM.",
-      "icon": "workflow",
-      "bullets": [
-        "HubSpot & Salesforce ready webhooks",
-        "AI assistant drafts follow-up scripts",
-        "Real-time attribution dashboards"
-      ]
-    }
-  ],
-  "testimonials": {
-    "headline": "Agents and brokerages scaling with SmartLead",
-    "items": [
-      {
-        "quote": "We closed five listings in 90 days from SmartLead territories we never would have targeted otherwise.",
-        "author": "Jordan Ellis",
-        "role": "Founder, Ellis & Co. Realty",
-        "avatar": "/images/testimonials/avatar-1.svg",
-        "companyLogo": "/images/logos/company-1.svg"
-      },
-      {
-        "quote": "Our agents finally have a predictable pipeline. The automation flows keep leads warm until they're ready to list.",
-        "author": "Priya Patel",
-        "role": "Marketing Director, Elevate Brokerage",
-        "avatar": "/images/testimonials/avatar-2.svg",
-        "companyLogo": "/images/logos/company-2.svg"
-      }
-    ]
-  },
-  "guide": {
-    "title": "2025 Home Seller Playbook",
-    "description": "The definitive guide to winning listings in low inventory markets with predictive intelligence.",
-    "cta": { "label": "Access the guide", "href": "/resources/2025-seller-playbook", "variant": "primary" },
-    "assetId": "guide-2025-seller-playbook"
-  },
-  "roiCalculator": {
-    "headline": "See how SmartLead turns budget into listings",
-    "subheadline": "Adjust the sliders to project pipeline impact based on territory size and marketing investment.",
-    "primaryCta": { "label": "Get a custom ROI model", "href": "/contact#demo", "variant": "primary" },
-    "scenarios": [
-      { "label": "Solo agent", "transactionVolume": 15, "averageCommission": 9000, "winRate": 0.28 },
-      { "label": "Boutique team", "transactionVolume": 45, "averageCommission": 10000, "winRate": 0.32 },
-      { "label": "Brokerage office", "transactionVolume": 120, "averageCommission": 11000, "winRate": 0.37 }
-    ],
-    "assumptions": [
-      "Predictive scoring increases listing appointments by 38% on average",
-      "Omnichannel campaigns touch each homeowner at least 6 times",
-      "CRM automations convert 24% more appointments into signed listings"
-    ]
-  },
-  "caseStudies": {
-    "headline": "Proof from competitive markets",
-    "subheadline": "See how teams like yours capture listings before competitors even know who is moving.",
-    "items": [
-      {
-        "title": "Austin luxury team",
-        "summary": "Generated .2M in pipeline in 6 weeks",
-        "market": "Austin, TX",
-        "logo": "/images/logos/logo-1.svg",
-        "metrics": [
-          { "label": "Listings won", "value": 9 },
-          { "label": "Avg. days to first deal", "value": 28 },
-          { "label": "ROI", "value": 6.4, "suffix": "x" }
-        ],
-        "testimonial": {
-          "quote": "SmartLead enabled us to dominate the relocation market before spring season even started.",
-          "author": "Melissa Carter",
-          "role": "Principal Broker"
-        },
-        "pdfAssetId": "case-study-austin",
-        "image": "/images/resources/resource-1.svg"
-      },
-      {
-        "title": "Scottsdale brokerage",
-        "summary": "75% of new listings sourced from SmartLead territories",
-        "market": "Scottsdale, AZ",
-        "logo": "/images/logos/logo-2.svg",
-        "metrics": [
-          { "label": "Appointments per month", "value": 32 },
-          { "label": "Cost per listing", "value": 1580, "prefix": "$" },
-          { "label": "Database reactivation", "value": 41, "suffix": "%" }
-        ],
-        "pdfAssetId": "case-study-scottsdale",
-        "image": "/images/resources/resource-2.svg"
-      },
-      {
-        "title": "Seattle expansion team",
-        "summary": "Reactivated 1,200 past clients with nurture automations",
-        "market": "Seattle, WA",
-        "logo": "/images/logos/logo-3.svg",
-        "metrics": [
-          { "label": "Pipeline influenced", "value": 5100000, "prefix": "$" },
-          { "label": "Emails opened", "value": 68, "suffix": "%" },
-          { "label": "CTV impressions", "value": 1.8, "suffix": "M" }
-        ],
-        "image": "/images/resources/resource-3.svg"
-      }
-    ]
-  },
-  "newsletter": {
-    "eyebrow": "Weekly insights",
-    "headline": "Subscribe to the Listing Intelligence Brief",
-    "description": "Get territory heat maps, seller scripts, and campaign templates delivered every Wednesday.",
-    "cta": { "label": "Join the newsletter", "href": "/resources/newsletter" }
-  },
-  "journey": [
-    { "title": "Pinpoint your market", "description": "Upload your CRM or select from 250+ micro-territories to reveal the highest intent segments.", "icon": "map" },
-    { "title": "Launch multi-channel campaigns", "description": "Deploy SmartTargeting playbooks, reach sellers across digital, mail, and connected TV.", "icon": "megaphone" },
-    { "title": "Convert and measure", "description": "Sync opportunities to your CRM and prove ROI with attribution dashboards.", "icon": "chart" }
-  ],
-  "territoryMap": {
-    "headline": "Check availability in your market",
-    "description": "High-intent clusters refresh weekly. Enter your territory to see if SmartLead coverage is open.",
-    "cta": { "label": "Request territory analysis", "href": "/contact#territory" },
-    "dataset": [
-      {
-        "zip": "78701",
-        "city": "Austin",
-        "state": "TX",
-        "score": 87,
-        "medianHomeValue": 645000,
-        "turnoverRate": 0.08,
-        "latitude": 30.2711,
-        "longitude": -97.7437
-      },
-      {
-        "zip": "85251",
-        "city": "Scottsdale",
-        "state": "AZ",
-        "score": 90,
-        "medianHomeValue": 720000,
-        "turnoverRate": 0.075,
-        "latitude": 33.4942,
-        "longitude": -111.9247
-      },
-      {
-        "zip": "98109",
-        "city": "Seattle",
-        "state": "WA",
-        "score": 83,
-        "medianHomeValue": 815000,
-        "turnoverRate": 0.07,
-        "latitude": 47.6267,
-        "longitude": -122.35
-      }
-    ]
-  },
-  "resources": {
-    "headline": "Insights to win more listings",
-    "items": [
-      {
-        "title": "How predictive analytics reshapes 2025 seller pipelines",
-        "slug": "predictive-analytics-seller-pipelines",
-        "category": "Blog",
-        "description": "Three data signals that reveal which homeowners will list next.",
-        "image": "/images/resources/resource-1.svg",
-        "publishDate": "2025-08-15",
-        "readingTime": "5 min"
-      },
-      {
-        "title": "SmartTargeting launch checklist",
-        "slug": "smarttargeting-launch-checklist",
-        "category": "Download",
-        "description": "A step-by-step plan for brokers implementing SmartLead.",
-        "image": "/images/resources/resource-2.svg",
-        "publishDate": "2025-07-12",
-        "readingTime": "7 min"
-      },
-      {
-        "title": "Webinar: Omnichannel seller outreach",
-        "slug": "webinar-omnichannel-seller-outreach",
-        "category": "Webinar",
-        "description": "See how top agents combine direct mail, social, and CTV.",
-        "image": "/images/resources/resource-3.svg",
-        "publishDate": "2025-09-01",
-        "readingTime": "45 min"
-      }
-    ]
-  },
-  "faqs": [
-    {
-      "question": "Which CRMs do you integrate with?",
-      "answer": "SmartLead connects with HubSpot, Salesforce, Follow Up Boss, BoomTown, and 40+ more via webhook and native integrations."
-    },
-    {
-      "question": "How accurate is your seller intent scoring?",
-      "answer": "Our predictive model is trained on 50M+ household records and scores are validated quarterly against closed transactions."
-    },
-    {
-      "question": "Can I protect exclusive territories?",
-      "answer": "Yes. We work with you to define exclusive zip codes or micro-territories and maintain caps per market."
-    }
-  ]
+    "seo":  {
+                "title":  "Unlock listing-ready leads with SmartLead Marketing",
+                "description":  "Predictive real estate marketing platform delivering seller-ready leads, automated nurture, and measurable ROI.",
+                "keywords":  [
+                                 "real estate leads",
+                                 "predictive analytics",
+                                 "smartzip alternative"
+                             ]
+            },
+    "hero":  {
+                 "eyebrow":  "Predictive Seller Intelligence",
+                 "heading":  "Own the listings before anyone else does",
+                 "subheading":  "Pinpoint homeowners most likely to sell, launch multi-channel campaigns in minutes, and hand off marketing-qualified opportunities automatically to your CRM.",
+                 "primaryCta":  {
+                                    "label":  "See SmartTargeting live",
+                                    "href":  "/contact#demo",
+                                    "variant":  "primary"
+                                },
+                 "secondaryCta":  {
+                                      "label":  "Download the 2025 Seller Playbook",
+                                      "href":  "/resources/2025-seller-playbook",
+                                      "variant":  "secondary"
+                                  },
+                 "video":  {
+                               "provider":  "vimeo",
+                               "id":  "912345678",
+                               "thumbnail":  "/images/placeholders/hero-video-poster.svg"
+                           }
+             },
+    "metrics":  [
+                    {
+                        "label":  "Seller intent accuracy",
+                        "value":  92,
+                        "suffix":  "%",
+                        "description":  "Validated by third-party data partners"
+                    },
+                    {
+                        "label":  "Pipeline lift",
+                        "value":  5,
+                        "suffix":  "x",
+                        "description":  "Average increase for top territories"
+                    },
+                    {
+                        "label":  "Campaign launch time",
+                        "value":  12,
+                        "suffix":  "min",
+                        "description":  "From login to omnichannel outreach"
+                    }
+                ],
+    "logos":  [
+                  "/images/logos/logo-1.svg",
+                  "/images/logos/logo-2.svg",
+                  "/images/logos/logo-3.svg",
+                  "/images/logos/logo-4.svg",
+                  "/images/logos/logo-5.svg"
+              ],
+    "features":  [
+                     {
+                         "title":  "Predict exactly who will list",
+                         "description":  "Proprietary AI combines 300+ behavioral and property signals to score every homeowner in your territory.",
+                         "icon":  "target",
+                         "bullets":  [
+                                         "Dynamic territory scoring refreshed weekly",
+                                         "Seller watchlists with instant alerts",
+                                         "Segment by equity, tenure, and lifestyle"
+                                     ]
+                     },
+                     {
+                         "title":  "Launch omnichannel in one click",
+                         "description":  "Direct mail, email, social, and connected TV campaigns orchestrated from a single playbook.",
+                         "icon":  "spark",
+                         "bullets":  [
+                                         "Pre-built campaigns proven to convert",
+                                         "Marketing calendar synced to your CRM",
+                                         "Co-branded partner templates included"
+                                     ]
+                     },
+                     {
+                         "title":  "Automate nurture to appointment",
+                         "description":  "Lead routing, task automation, and engagement scoring connect seamlessly with your CRM.",
+                         "icon":  "workflow",
+                         "bullets":  [
+                                         "HubSpot \u0026 Salesforce ready webhooks",
+                                         "AI assistant drafts follow-up scripts",
+                                         "Real-time attribution dashboards"
+                                     ]
+                     }
+                 ],
+    "testimonials":  {
+                         "headline":  "Agents and brokerages scaling with SmartLead",
+                         "items":  [
+                                       {
+                                           "quote":  "We closed five listings in 90 days from SmartLead territories we never would have targeted otherwise.",
+                                           "author":  "Jordan Ellis",
+                                           "role":  "Founder, Ellis \u0026 Co. Realty",
+                                           "avatar":  "/images/testimonials/avatar-1.svg",
+                                           "companyLogo":  "/images/logos/company-1.svg"
+                                       },
+                                       {
+                                           "quote":  "Our agents finally have a predictable pipeline. The automation flows keep leads warm until they\u0027re ready to list.",
+                                           "author":  "Priya Patel",
+                                           "role":  "Marketing Director, Elevate Brokerage",
+                                           "avatar":  "/images/testimonials/avatar-2.svg",
+                                           "companyLogo":  "/images/logos/company-2.svg"
+                                       }
+                                   ]
+                     },
+    "guide":  {
+                  "title":  "2025 Home Seller Playbook",
+                  "description":  "The definitive guide to winning listings in low inventory markets with predictive intelligence.",
+                  "cta":  {
+                              "label":  "Access the guide",
+                              "href":  "/resources/2025-seller-playbook",
+                              "variant":  "primary"
+                          },
+                  "assetId":  "guide-2025-seller-playbook"
+              },
+    "roiCalculator":  {
+                          "headline":  "See how SmartLead turns budget into listings",
+                          "subheadline":  "Adjust the sliders to project pipeline impact based on territory size and marketing investment.",
+                          "primaryCta":  {
+                                             "label":  "Get a custom ROI model",
+                                             "href":  "/contact#demo",
+                                             "variant":  "primary"
+                                         },
+                          "scenarios":  [
+                                            {
+                                                "label":  "Solo agent",
+                                                "transactionVolume":  15,
+                                                "averageCommission":  9000,
+                                                "winRate":  0.28
+                                            },
+                                            {
+                                                "label":  "Boutique team",
+                                                "transactionVolume":  45,
+                                                "averageCommission":  10000,
+                                                "winRate":  0.32
+                                            },
+                                            {
+                                                "label":  "Brokerage office",
+                                                "transactionVolume":  120,
+                                                "averageCommission":  11000,
+                                                "winRate":  0.37
+                                            }
+                                        ],
+                          "assumptions":  [
+                                              "Predictive scoring increases listing appointments by 38% on average",
+                                              "Omnichannel campaigns touch each homeowner at least 6 times",
+                                              "CRM automations convert 24% more appointments into signed listings"
+                                          ]
+                      },
+    "caseStudies":  {
+                        "headline":  "Proof from competitive markets",
+                        "subheadline":  "See how teams like yours capture listings before competitors even know who is moving.",
+                        "items":  [
+                                      {
+                                          "title":  "Austin luxury team",
+                                          "summary":  "Generated .2M in pipeline in 6 weeks",
+                                          "market":  "Austin, TX",
+                                          "logo":  "/images/logos/logo-1.svg",
+                                          "metrics":  [
+                                                          {
+                                                              "label":  "Listings won",
+                                                              "value":  9
+                                                          },
+                                                          {
+                                                              "label":  "Avg. days to first deal",
+                                                              "value":  28
+                                                          },
+                                                          {
+                                                              "label":  "ROI",
+                                                              "value":  6.4,
+                                                              "suffix":  "x"
+                                                          }
+                                                      ],
+                                          "testimonial":  {
+                                                              "quote":  "SmartLead enabled us to dominate the relocation market before spring season even started.",
+                                                              "author":  "Melissa Carter",
+                                                              "role":  "Principal Broker"
+                                                          },
+                                          "pdfAssetId":  "case-study-austin",
+                                          "image":  "/images/resources/resource-1.svg"
+                                      },
+                                      {
+                                          "title":  "Scottsdale brokerage",
+                                          "summary":  "75% of new listings sourced from SmartLead territories",
+                                          "market":  "Scottsdale, AZ",
+                                          "logo":  "/images/logos/logo-2.svg",
+                                          "metrics":  [
+                                                          {
+                                                              "label":  "Appointments per month",
+                                                              "value":  32
+                                                          },
+                                                          {
+                                                              "label":  "Cost per listing",
+                                                              "value":  1580,
+                                                              "prefix":  "$"
+                                                          },
+                                                          {
+                                                              "label":  "Database reactivation",
+                                                              "value":  41,
+                                                              "suffix":  "%"
+                                                          }
+                                                      ],
+                                          "pdfAssetId":  "case-study-scottsdale",
+                                          "image":  "/images/resources/resource-2.svg"
+                                      },
+                                      {
+                                          "title":  "Seattle expansion team",
+                                          "summary":  "Reactivated 1,200 past clients with nurture automations",
+                                          "market":  "Seattle, WA",
+                                          "logo":  "/images/logos/logo-3.svg",
+                                          "metrics":  [
+                                                          {
+                                                              "label":  "Pipeline influenced",
+                                                              "value":  5100000,
+                                                              "prefix":  "$"
+                                                          },
+                                                          {
+                                                              "label":  "Emails opened",
+                                                              "value":  68,
+                                                              "suffix":  "%"
+                                                          },
+                                                          {
+                                                              "label":  "CTV impressions",
+                                                              "value":  1.8,
+                                                              "suffix":  "M"
+                                                          }
+                                                      ],
+                                          "image":  "/images/resources/resource-3.svg"
+                                      }
+                                  ]
+                    },
+    "newsletter":  {
+                       "eyebrow":  "Weekly insights",
+                       "headline":  "Subscribe to the Listing Intelligence Brief",
+                       "description":  "Get territory heat maps, seller scripts, and campaign templates delivered every Wednesday.",
+                       "cta":  {
+                                   "label":  "Join the newsletter",
+                                   "href":  "/resources/newsletter"
+                               }
+                   },
+    "journey":  [
+                    {
+                        "title":  "Pinpoint your market",
+                        "description":  "Upload your CRM or select from 250+ micro-territories to reveal the highest intent segments.",
+                        "icon":  "map"
+                    },
+                    {
+                        "title":  "Launch multi-channel campaigns",
+                        "description":  "Deploy SmartTargeting playbooks, reach sellers across digital, mail, and connected TV.",
+                        "icon":  "megaphone"
+                    },
+                    {
+                        "title":  "Convert and measure",
+                        "description":  "Sync opportunities to your CRM and prove ROI with attribution dashboards.",
+                        "icon":  "chart"
+                    }
+                ],
+    "territoryMap":  {
+                         "headline":  "Check availability in your market",
+                         "description":  "High-intent clusters refresh weekly. Enter your territory to see if SmartLead coverage is open.",
+                         "cta":  {
+                                     "label":  "Request territory analysis",
+                                     "href":  "/contact#territory"
+                                 },
+                         "dataset":  [
+                                         {
+                                             "zip":  "78701",
+                                             "city":  "Austin",
+                                             "state":  "TX",
+                                             "score":  87,
+                                             "medianHomeValue":  645000,
+                                             "turnoverRate":  0.08,
+                                             "latitude":  30.2711,
+                                             "longitude":  -97.7437
+                                         },
+                                         {
+                                             "zip":  "85251",
+                                             "city":  "Scottsdale",
+                                             "state":  "AZ",
+                                             "score":  90,
+                                             "medianHomeValue":  720000,
+                                             "turnoverRate":  0.075,
+                                             "latitude":  33.4942,
+                                             "longitude":  -111.9247
+                                         },
+                                         {
+                                             "zip":  "98109",
+                                             "city":  "Seattle",
+                                             "state":  "WA",
+                                             "score":  83,
+                                             "medianHomeValue":  815000,
+                                             "turnoverRate":  0.07,
+                                             "latitude":  47.6267,
+                                             "longitude":  -122.35
+                                         }
+                                     ]
+                     },
+    "resources":  {
+                      "headline":  "Insights to win more listings",
+                      "items":  [
+                                    {
+                                        "title":  "How predictive analytics reshapes 2025 seller pipelines",
+                                        "slug":  "predictive-analytics-seller-pipelines",
+                                        "category":  "Blog",
+                                        "description":  "Three data signals that reveal which homeowners will list next.",
+                                        "image":  "/images/resources/resource-1.svg",
+                                        "publishDate":  "2025-08-15",
+                                        "readingTime":  "5 min"
+                                    },
+                                    {
+                                        "title":  "SmartTargeting launch checklist",
+                                        "slug":  "smarttargeting-launch-checklist",
+                                        "category":  "Download",
+                                        "description":  "A step-by-step plan for brokers implementing SmartLead.",
+                                        "image":  "/images/resources/resource-2.svg",
+                                        "publishDate":  "2025-07-12",
+                                        "readingTime":  "7 min"
+                                    },
+                                    {
+                                        "title":  "Webinar: Omnichannel seller outreach",
+                                        "slug":  "webinar-omnichannel-seller-outreach",
+                                        "category":  "Webinar",
+                                        "description":  "See how top agents combine direct mail, social, and CTV.",
+                                        "image":  "/images/resources/resource-3.svg",
+                                        "publishDate":  "2025-09-01",
+                                        "readingTime":  "45 min"
+                                    }
+                                ]
+                  },
+    "faqs":  [
+                 {
+                     "question":  "Which CRMs do you integrate with?",
+                     "answer":  "SmartLead connects with HubSpot, Salesforce, Follow Up Boss, BoomTown, and 40+ more via webhook and native integrations."
+                 },
+                 {
+                     "question":  "How accurate is your seller intent scoring?",
+                     "answer":  "Our predictive model is trained on 50M+ household records and scores are validated quarterly against closed transactions."
+                 },
+                 {
+                     "question":  "Can I protect exclusive territories?",
+                     "answer":  "Yes. We work with you to define exclusive zip codes or micro-territories and maintain caps per market."
+                 }
+             ],
+    "proofExplorer":  {
+                          "headline":  "Explore live SmartLead territories",
+                          "description":  "Filter by market type and inventory pressure to see where SmartLead partners are winning listings.",
+                          "cta":  {
+                                      "label":  "Request featured territory",
+                                      "variant":  "primary",
+                                      "href":  "/contact#demo"
+                                  },
+                          "marketTypes":  [
+                                              "Luxury",
+                                              "Urban core",
+                                              "Suburban expansion"
+                                          ],
+                          "inventoryLevels":  [
+                                                  "Tight",
+                                                  "Balanced",
+                                                  "High turnover"
+                                              ],
+                          "markets":  [
+                                          {
+                                              "name":  "Clarkson Collective",
+                                              "city":  "Austin",
+                                              "state":  "TX",
+                                              "marketType":  "Urban core",
+                                              "inventoryLevel":  "Tight",
+                                              "latitude":  30.2682,
+                                              "longitude":  -97.7428,
+                                              "sellerIntentScore":  91,
+                                              "avgDaysOnMarket":  19,
+                                              "closedVolume":  4.2,
+                                              "caseStudyTitle":  "Austin luxury team",
+                                              "caseStudySummary":  "Generated $4.2M in pipeline in 6 weeks",
+                                              "pdfAssetId":  "case-study-austin"
+                                          },
+                                          {
+                                              "name":  "Sonoran Premier Group",
+                                              "city":  "Scottsdale",
+                                              "state":  "AZ",
+                                              "marketType":  "Luxury",
+                                              "inventoryLevel":  "Balanced",
+                                              "latitude":  33.4942,
+                                              "longitude":  -111.9261,
+                                              "sellerIntentScore":  88,
+                                              "avgDaysOnMarket":  24,
+                                              "closedVolume":  3.8,
+                                              "caseStudyTitle":  "Scottsdale brokerage",
+                                              "caseStudySummary":  "75% of new listings sourced from SmartLead territories",
+                                              "pdfAssetId":  "case-study-scottsdale"
+                                          },
+                                          {
+                                              "name":  "Soundview Expansion Team",
+                                              "city":  "Seattle",
+                                              "state":  "WA",
+                                              "marketType":  "Suburban expansion",
+                                              "inventoryLevel":  "High turnover",
+                                              "latitude":  47.6267,
+                                              "longitude":  -122.3482,
+                                              "sellerIntentScore":  85,
+                                              "avgDaysOnMarket":  27,
+                                              "closedVolume":  5.1,
+                                              "caseStudyTitle":  "Seattle expansion team",
+                                              "caseStudySummary":  "Reactivated 1,200 past clients with nurture automations",
+                                              "pdfAssetId":  null
+                                          }
+                                      ]
+                      }
 }

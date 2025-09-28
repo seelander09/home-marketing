@@ -121,6 +121,8 @@ export type TerritoryDatasetEntry = {
   score: number
   medianHomeValue: number
   turnoverRate: number
+  latitude?: number
+  longitude?: number
   geojson?: string
 }
 
@@ -149,6 +151,31 @@ export type DashboardConfig = {
   widgets: DashboardWidget[]
 }
 
+export type ProofMarket = {
+  name: string
+  city: string
+  state: string
+  marketType: string
+  inventoryLevel: string
+  latitude: number
+  longitude: number
+  sellerIntentScore: number
+  avgDaysOnMarket: number
+  closedVolume: number
+  caseStudyTitle?: string
+  caseStudySummary?: string
+  pdfAssetId?: string
+}
+
+export type ProofExplorerConfig = {
+  headline: string
+  description: string
+  marketTypes: string[]
+  inventoryLevels: string[]
+  cta: CTA
+  markets: ProofMarket[]
+}
+
 export type HomePagePayload = {
   seo: PageSEO
   hero: HeroSection
@@ -162,6 +189,7 @@ export type HomePagePayload = {
   guide: GuideOffer
   roiCalculator: RoiCalculatorConfig
   caseStudies: CaseStudiesBlock
+  proofExplorer: ProofExplorerConfig
   newsletter: NewsletterBlock
   journey: TimelineStep[]
   territoryMap: TerritoryMapConfig

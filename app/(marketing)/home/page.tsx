@@ -1,4 +1,4 @@
-﻿import type { Metadata } from 'next'
+import type { Metadata } from 'next'
 import { Hero } from '@/components/sections/Hero'
 import { LogoCarousel } from '@/components/sections/LogoCarousel'
 import { FeatureGrid } from '@/components/sections/FeatureGrid'
@@ -6,6 +6,7 @@ import { TestimonialCarousel } from '@/components/sections/TestimonialCarousel'
 import { GuideOfferSection } from '@/components/sections/GuideOfferSection'
 import { RoiCalculator } from '@/components/sections/RoiCalculator'
 import { CaseStudiesCarousel } from '@/components/sections/CaseStudiesCarousel'
+import { CustomerProofExplorer } from '@/components/sections/CustomerProofExplorer'
 import { NewsletterSignup } from '@/components/sections/NewsletterSignup'
 import { TerritoryMap } from '@/components/sections/TerritoryMap'
 import { JourneyTimeline } from '@/components/sections/JourneyTimeline'
@@ -34,6 +35,7 @@ export default async function HomePage() {
       <RoiCalculator config={home.roiCalculator} />
       <TestimonialCarousel testimonials={home.testimonials.items} headline={home.testimonials.headline} />
       <CaseStudiesCarousel block={home.caseStudies} />
+      <CustomerProofExplorer config={home.proofExplorer} />
       <GuideOfferSection guide={home.guide} />
       <TerritoryMap config={home.territoryMap} />
       <NewsletterSignup block={home.newsletter} />
@@ -43,3 +45,5 @@ export default async function HomePage() {
     </>
   )
 }
+
+

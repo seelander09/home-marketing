@@ -16,6 +16,8 @@ import testimonial from './schemas/objects/testimonial'
 import timelineStep from './schemas/objects/timelineStep'
 import faq from './schemas/objects/faq'
 import seo from './schemas/objects/seo'
+import proofMarket from './schemas/objects/proofMarket'
+import proofExplorer from './schemas/objects/proofExplorer'
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
@@ -33,6 +35,8 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     testimonial,
     timelineStep,
     faq,
-    seo
+    seo,
+    proofMarket,
+    proofExplorer
   ]
 }

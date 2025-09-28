@@ -40,13 +40,49 @@
     guide,
     roiCalculator,
     caseStudies,
+    proofExplorer {
+      headline,
+      description,
+      cta,
+      marketTypes,
+      inventoryLevels,
+      markets[] {
+        name,
+        city,
+        state,
+        marketType,
+        inventoryLevel,
+        latitude,
+        longitude,
+        sellerIntentScore,
+        avgDaysOnMarket,
+        closedVolume,
+        caseStudyTitle,
+        caseStudySummary,
+        pdfAssetId
+      }
+    },
     newsletter,
     journey[] {
       title,
       description,
       icon
     },
-    territoryMap,
+    territoryMap {
+      headline,
+      description,
+      cta,
+      dataset[] {
+        zip,
+        city,
+        state,
+        score,
+        medianHomeValue,
+        turnoverRate,
+        latitude,
+        longitude
+      }
+    },
     resources {
       headline,
       items[]->{

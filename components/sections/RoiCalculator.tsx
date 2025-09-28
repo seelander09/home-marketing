@@ -1,6 +1,6 @@
 ﻿"use client"
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { RoiCalculatorConfig, RoiScenario } from '@/lib/cms/types'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -8,6 +8,17 @@ import { formatNumber } from '@/lib/utils'
 
 const budgetSteps = [2500, 5000, 7500, 10000]
 const householdSteps = [5000, 10000, 20000, 40000]
+const ROI_STORAGE_KEY = 'smartlead-roi-result'
+
+type StoredRoi = {
+  scenarioLabel: string
+  monthlyBudget: number
+  households: number
+  revenue: number
+  influencedDeals: number
+  adjustedWinRate: number
+  roi: number
+}
 
 function calculatePipeline(scenario: RoiScenario, budget: number, households: number) {
   const marketingLift = Math.min(0.65, budget / 20000)
@@ -30,7 +41,38 @@ export function RoiCalculator({ config }: { config: RoiCalculatorConfig }) {
   const [monthlyBudget, setMonthlyBudget] = useState<number>(budgetSteps[1])
   const [households, setHouseholds] = useState<number>(householdSteps[1])
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const stored = window.localStorage.getItem(ROI_STORAGE_KEY)
+    if (!stored) return
+    try {
+      const parsed = JSON.parse(stored) as StoredRoi
+      const matchedScenario = config.scenarios.find((item) => item.label === parsed.scenarioLabel)
+      if (matchedScenario) {
+        setScenario(matchedScenario)
+        setMonthlyBudget(parsed.monthlyBudget)
+        setHouseholds(parsed.households)
+      }
+    } catch (error) {
+      console.warn('Unable to hydrate ROI calculator from storage', error)
+    }
+  }, [config.scenarios])
+
   const results = useMemo(() => calculatePipeline(scenario, monthlyBudget, households), [scenario, monthlyBudget, households])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const payload: StoredRoi = {
+      scenarioLabel: scenario.label,
+      monthlyBudget,
+      households,
+      revenue: results.revenue,
+      influencedDeals: results.influencedDeals,
+      adjustedWinRate: results.adjustedWinRate,
+      roi: results.roi
+    }
+    window.localStorage.setItem(ROI_STORAGE_KEY, JSON.stringify(payload))
+  }, [scenario, monthlyBudget, households, results])
 
   return (
     <section className="section bg-surface-subtle">
@@ -101,22 +143,10 @@ export function RoiCalculator({ config }: { config: RoiCalculatorConfig }) {
               </div>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="rounded-2xl bg-surface-subtle p-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-brand-navy/50">Projected annual revenue</p>
-                <p className="mt-2 text-2xl font-semibold text-brand-navy"></p>
-              </div>
-              <div className="rounded-2xl bg-surface-subtle p-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-brand-navy/50">Influenced listings / year</p>
-                <p className="mt-2 text-2xl font-semibold text-brand-navy">{formatNumber(results.influencedDeals)}</p>
-              </div>
-              <div className="rounded-2xl bg-surface-subtle p-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-brand-navy/50">Adjusted win rate</p>
-                <p className="mt-2 text-2xl font-semibold text-brand-navy">{(results.adjustedWinRate * 100).toFixed(1)}%</p>
-              </div>
-              <div className="rounded-2xl bg-surface-subtle p-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-brand-navy/50">Return on spend</p>
-                <p className="mt-2 text-2xl font-semibold text-brand-navy">{results.roi.toFixed(1)}x</p>
-              </div>
+              <StatCard label="Projected annual revenue" value={$} />
+              <StatCard label="Influenced listings / year" value={formatNumber(results.influencedDeals)} />
+              <StatCard label="Adjusted win rate" value={${(results.adjustedWinRate * 100).toFixed(1)}%} />
+              <StatCard label="Return on spend" value={${results.roi.toFixed(1)}x} />
             </div>
             <ul className="space-y-2 text-sm text-brand-navy/60">
               {config.assumptions.map((item) => (
@@ -134,32 +164,35 @@ export function RoiCalculator({ config }: { config: RoiCalculatorConfig }) {
         <div className="space-y-4 rounded-3xl border border-brand-navy/10 bg-white p-6 shadow-card">
           <h3 className="text-xl font-semibold text-brand-navy">Scenario inputs</h3>
           <dl className="space-y-3 text-sm text-brand-navy/70">
-            <div className="flex justify-between">
-              <dt>Annual transactions</dt>
-              <dd className="font-semibold text-brand-navy">{scenario.transactionVolume}</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt>Average commission</dt>
-              <dd className="font-semibold text-brand-navy"></dd>
-            </div>
-            <div className="flex justify-between">
-              <dt>Baseline win rate</dt>
-              <dd className="font-semibold text-brand-navy">{(scenario.winRate * 100).toFixed(0)}%</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt>Annual marketing spend</dt>
-              <dd className="font-semibold text-brand-navy"></dd>
-            </div>
-            <div className="flex justify-between">
-              <dt>Households in territory</dt>
-              <dd className="font-semibold text-brand-navy">{formatNumber(households)}</dd>
-            </div>
+            <InfoRow label="Annual transactions" value={formatNumber(scenario.transactionVolume)} />
+            <InfoRow label="Average commission" value={$} />
+            <InfoRow label="Baseline win rate" value={${(scenario.winRate * 100).toFixed(0)}%} />
+            <InfoRow label="Annual marketing spend" value={$} />
+            <InfoRow label="Households in territory" value={formatNumber(households)} />
           </dl>
           <p className="text-xs text-brand-navy/50">
-            ROI projections are directional and based on SmartLead benchmark data from 2024-2025 launches.
+            ROI projections are directional and based on SmartLead benchmark data from recent territory launches.
           </p>
         </div>
       </div>
     </section>
+  )
+}
+
+function StatCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl bg-surface-subtle p-4">
+      <p className="text-xs font-semibold uppercase tracking-wide text-brand-navy/50">{label}</p>
+      <p className="mt-2 text-2xl font-semibold text-brand-navy">{value}</p>
+    </div>
+  )
+}
+
+function InfoRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex justify-between">
+      <dt>{label}</dt>
+      <dd className="font-semibold text-brand-navy">{value}</dd>
+    </div>
   )
 }
