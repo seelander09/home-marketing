@@ -1,4 +1,4 @@
-﻿import { cache } from 'react'
+import { cache } from 'react'
 import { sanityClient, sanityEnabled } from '@/lib/cms/client'
 import { mockContent } from '@/lib/cms/mock'
 import {
@@ -37,27 +37,27 @@ async function fetchOrFallback<T>(query: string, fallback: T, params: Record<str
 }
 
 export const getGlobalSettings = cache((): Promise<GlobalSettings> => {
-  return fetchOrFallback(GLOBAL_SETTINGS_QUERY, mockContent.global)
+  return fetchOrFallback(GLOBAL_SETTINGS_QUERY, mockContent.global as GlobalSettings)
 })
 
 export const getHomePage = cache((): Promise<HomePagePayload> => {
-  return fetchOrFallback(HOME_PAGE_QUERY, mockContent.home)
+  return fetchOrFallback(HOME_PAGE_QUERY, mockContent.home as HomePagePayload)
 })
 
 export const getProductsPage = cache((): Promise<ProductPagePayload> => {
-  return fetchOrFallback(PRODUCTS_PAGE_QUERY, mockContent.products)
+  return fetchOrFallback(PRODUCTS_PAGE_QUERY, mockContent.products as ProductPagePayload)
 })
 
 export const getResourcesPage = cache((): Promise<ResourcePagePayload> => {
-  return fetchOrFallback(RESOURCES_PAGE_QUERY, mockContent.resources)
+  return fetchOrFallback(RESOURCES_PAGE_QUERY, mockContent.resources as ResourcePagePayload)
 })
 
 export const getAboutPage = cache((): Promise<AboutPagePayload> => {
-  return fetchOrFallback(ABOUT_PAGE_QUERY, mockContent.about)
+  return fetchOrFallback(ABOUT_PAGE_QUERY, mockContent.about as AboutPagePayload)
 })
 
 export const getContactPage = cache((): Promise<ContactPagePayload> => {
-  return fetchOrFallback(CONTACT_PAGE_QUERY, mockContent.contact)
+  return fetchOrFallback(CONTACT_PAGE_QUERY, mockContent.contact as ContactPagePayload)
 })
 
 export async function getResourceBySlug(slug: string): Promise<ResourceItem & { body?: string }> {
@@ -66,7 +66,7 @@ export async function getResourceBySlug(slug: string): Promise<ResourceItem & { 
   }
 
   if (!sanityEnabled || !sanityClient) {
-    const fallback = mockContent.posts.find((post) => post.slug === slug)
+    const fallback = mockContent.posts.find((post) => post.slug === slug) as (ResourceItem & { body?: string }) | undefined
     if (!fallback) {
       throw new Error(`Resource with slug '${slug}' not found in mock content`)
     }
@@ -83,10 +83,11 @@ export async function getResourceBySlug(slug: string): Promise<ResourceItem & { 
     return result
   } catch (error) {
     console.warn('Falling back to mock content due to CMS error', error)
-    const fallback = mockContent.posts.find((post) => post.slug === slug)
+    const fallback = mockContent.posts.find((post) => post.slug === slug) as (ResourceItem & { body?: string }) | undefined
     if (!fallback) {
       throw error
     }
     return fallback
   }
 }
+

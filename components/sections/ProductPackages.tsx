@@ -1,6 +1,6 @@
-﻿import Link from 'next/link'
-import type { ProductPagePayload } from '@/lib/cms/types'
 import { Card } from '@/components/ui/Card'
+import { SmartLink } from '@/components/ui/SmartLink'
+import type { ProductPagePayload } from '@/lib/cms/types'
 
 export function ProductPackages({ packages }: { packages: ProductPagePayload['packages'] }) {
   return (
@@ -26,9 +26,9 @@ export function ProductPackages({ packages }: { packages: ProductPagePayload['pa
                   </li>
                 ))}
               </ul>
-              <Link href={pack.cta.href} className="btn btn-primary mt-auto inline-flex">
+              <SmartLink href={pack.cta.href} className="btn btn-primary mt-auto inline-flex">
                 {pack.cta.label}
-              </Link>
+              </SmartLink>
             </Card>
           ))}
         </div>

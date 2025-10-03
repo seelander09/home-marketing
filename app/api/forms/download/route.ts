@@ -1,4 +1,4 @@
-﻿import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { downloadRequestSchema } from '@/lib/forms/schemas'
 import { verifyRecaptcha } from '@/lib/forms/recaptcha'
 import { sendToCrm } from '@/lib/forms/crm'
@@ -24,11 +24,11 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { recaptchaToken, ...lead } = payload
-    await sendToCrm(lead, 'download-request')
+    await sendToCrm(payload, 'download-request')
   } catch (error) {
     return NextResponse.json({ error: 'Failed to send to CRM' }, { status: 502 })
   }
 
   return NextResponse.json({ success: true, downloadUrl: assetPath })
 }
+

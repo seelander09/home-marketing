@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -20,7 +20,7 @@ const steps = [
   { title: 'Territory', description: 'Where do you want to grow?' }
 ]
 
-const stepFields: Array<Array<keyof FormValues | 	erritory.>> = [
+const stepFields: string[][] = [
   ['firstName', 'lastName', 'email', 'phone'],
   ['role', 'brokerage', 'crm', 'transactionsPerYear'],
   ['territory.city', 'territory.state', 'territory.zip', 'message']
@@ -171,7 +171,7 @@ export function DemoRequestForm() {
             <ul className="mt-3 space-y-2 text-sm text-brand-navy/70">
               {territoryMatches.map((match) => (
                 <li key={match.zip}>
-                  {match.city}, {match.state} {match.zip} · Seller intent score {match.score}
+                  {match.city}, {match.state} {match.zip} Ãƒâ€š-  Seller intent score {match.score}
                 </li>
               ))}
             </ul>
@@ -278,8 +278,8 @@ export function DemoRequestForm() {
               {territoryMatches.length ? (
                 <ul className="mt-3 space-y-2 rounded-2xl bg-surface-subtle p-4 text-sm text-brand-navy/70">
                   {territoryMatches.map((match) => (
-                    <li key={${match.city}-}>
-                      {match.city}, {match.state} {match.zip} · Score {match.score}
+                    <li key={`${match.city}-${match.state}-${match.zip}`}>
+                      {match.city}, {match.state} {match.zip} - Score {match.score}
                     </li>
                   ))}
                 </ul>
@@ -322,3 +322,6 @@ export function DemoRequestForm() {
     </form>
   )
 }
+
+
+

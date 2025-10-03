@@ -1,14 +1,20 @@
-﻿"use client"
+"use client"
 
 import { useEffect, useMemo, useState } from 'react'
 import type { RoiCalculatorConfig, RoiScenario } from '@/lib/cms/types'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { formatNumber } from '@/lib/utils'
+import { cn, formatNumber } from '@/lib/utils'
 
 const budgetSteps = [2500, 5000, 7500, 10000]
 const householdSteps = [5000, 10000, 20000, 40000]
 const ROI_STORAGE_KEY = 'smartlead-roi-result'
+
+const currencyFormatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  maximumFractionDigits: 0
+})
 
 type StoredRoi = {
   scenarioLabel: string
@@ -26,7 +32,7 @@ function calculatePipeline(scenario: RoiScenario, budget: number, households: nu
   const adjustedWinRate = scenario.winRate + marketingLift * 0.35 + territoryLift * 0.25
   const influencedDeals = scenario.transactionVolume * adjustedWinRate
   const revenue = influencedDeals * scenario.averageCommission
-  const roi = revenue / (budget * 12)
+  const roi = budget > 0 ? revenue / (budget * 12) : 0
 
   return {
     adjustedWinRate,
@@ -34,6 +40,10 @@ function calculatePipeline(scenario: RoiScenario, budget: number, households: nu
     revenue,
     roi
   }
+}
+
+function formatCurrency(value: number) {
+  return currencyFormatter.format(Math.max(0, Math.round(value)))
 }
 
 export function RoiCalculator({ config }: { config: RoiCalculatorConfig }) {
@@ -58,7 +68,10 @@ export function RoiCalculator({ config }: { config: RoiCalculatorConfig }) {
     }
   }, [config.scenarios])
 
-  const results = useMemo(() => calculatePipeline(scenario, monthlyBudget, households), [scenario, monthlyBudget, households])
+  const results = useMemo(
+    () => calculatePipeline(scenario, monthlyBudget, households),
+    [scenario, monthlyBudget, households]
+  )
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -111,10 +124,13 @@ export function RoiCalculator({ config }: { config: RoiCalculatorConfig }) {
                     <button
                       key={value}
                       type="button"
-                      className={ounded-full px-3 py-1 text-xs font-semibold }
+                      className={cn(
+                        'rounded-full border border-brand-navy/10 px-3 py-1 text-xs font-semibold text-brand-navy/70 transition hover:border-brand-turquoise hover:text-brand-navy',
+                        monthlyBudget === value && 'border-brand-turquoise bg-brand-turquoise/10 text-brand-navy'
+                      )}
                       onClick={() => setMonthlyBudget(value)}
                     >
-                      
+                      {formatCurrency(value)}
                     </button>
                   ))}
                 </div>
@@ -133,7 +149,10 @@ export function RoiCalculator({ config }: { config: RoiCalculatorConfig }) {
                     <button
                       key={value}
                       type="button"
-                      className={ounded-full px-3 py-1 text-xs font-semibold }
+                      className={cn(
+                        'rounded-full border border-brand-navy/10 px-3 py-1 text-xs font-semibold text-brand-navy/70 transition hover:border-brand-turquoise hover:text-brand-navy',
+                        households === value && 'border-brand-turquoise bg-brand-turquoise/10 text-brand-navy'
+                      )}
                       onClick={() => setHouseholds(value)}
                     >
                       {formatNumber(value)}
@@ -143,10 +162,10 @@ export function RoiCalculator({ config }: { config: RoiCalculatorConfig }) {
               </div>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
-              <StatCard label="Projected annual revenue" value={$} />
+              <StatCard label="Projected annual revenue" value={formatCurrency(results.revenue)} />
               <StatCard label="Influenced listings / year" value={formatNumber(results.influencedDeals)} />
-              <StatCard label="Adjusted win rate" value={${(results.adjustedWinRate * 100).toFixed(1)}%} />
-              <StatCard label="Return on spend" value={${results.roi.toFixed(1)}x} />
+              <StatCard label="Adjusted win rate" value={`${(results.adjustedWinRate * 100).toFixed(1)}%`} />
+              <StatCard label="Return on spend" value={`${results.roi.toFixed(1)}x`} />
             </div>
             <ul className="space-y-2 text-sm text-brand-navy/60">
               {config.assumptions.map((item) => (
@@ -156,8 +175,8 @@ export function RoiCalculator({ config }: { config: RoiCalculatorConfig }) {
                 </li>
               ))}
             </ul>
-            <Button asChild>
-              <a href={config.primaryCta.href}>{config.primaryCta.label}</a>
+            <Button type="button" onClick={() => window.open(config.primaryCta.href, '_self')}>
+              {config.primaryCta.label}
             </Button>
           </div>
         </div>
@@ -165,9 +184,9 @@ export function RoiCalculator({ config }: { config: RoiCalculatorConfig }) {
           <h3 className="text-xl font-semibold text-brand-navy">Scenario inputs</h3>
           <dl className="space-y-3 text-sm text-brand-navy/70">
             <InfoRow label="Annual transactions" value={formatNumber(scenario.transactionVolume)} />
-            <InfoRow label="Average commission" value={$} />
-            <InfoRow label="Baseline win rate" value={${(scenario.winRate * 100).toFixed(0)}%} />
-            <InfoRow label="Annual marketing spend" value={$} />
+            <InfoRow label="Average commission" value={formatCurrency(scenario.averageCommission)} />
+            <InfoRow label="Baseline win rate" value={`${(scenario.winRate * 100).toFixed(0)}%`} />
+            <InfoRow label="Annual marketing spend" value={formatCurrency(monthlyBudget * 12)} />
             <InfoRow label="Households in territory" value={formatNumber(households)} />
           </dl>
           <p className="text-xs text-brand-navy/50">
@@ -196,3 +215,4 @@ function InfoRow({ label, value }: { label: string; value: string }) {
     </div>
   )
 }
+

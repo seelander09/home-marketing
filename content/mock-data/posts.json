@@ -1,32 +1,42 @@
 ﻿[
-  {
-    "title": "The 2025 seller intelligence report",
-    "slug": "2025-seller-intelligence-report",
-    "category": "Download",
-    "description": "Discover which homeowner behaviors predict listings in 2025 and how to activate them.",
-    "image": "/images/resources/resource-4.svg",
-    "publishDate": "2025-08-01",
-    "readingTime": "15 min",
-    "body": "<h2>Inside the 2025 Seller Intelligence Report</h2><ul><li>The three data signals that forecast listings with 92% accuracy.</li><li>Territory heat maps to plan budget by micro-market.</li><li>Playbooks for activating high propensity sellers across channels.</li></ul>"
-  },
-  {
-    "title": "Three nurture flows that convert seller leads",
-    "slug": "nurture-flows-seller-leads",
-    "category": "Blog",
-    "description": "Automated sequences proven to move homeowners from interest to appointment.",
-    "image": "/images/resources/resource-5.svg",
-    "publishDate": "2025-07-18",
-    "readingTime": "6 min",
-    "body": "<h3>Flow 1: Hyper-local welcome</h3><p>Send three touches within the first week referencing local market stats.</p>"
-  },
-  {
-    "title": "SmartLead x HubSpot integration guide",
-    "slug": "smartlead-hubspot-integration",
-    "category": "Download",
-    "description": "Step-by-step workbook to sync SmartLead campaigns to HubSpot workflows.",
-    "image": "/images/resources/resource-6.svg",
-    "publishDate": "2025-06-30",
-    "readingTime": "10 min",
-    "body": "<h3>Mapping SmartLead to HubSpot</h3><p>Use deal stages to trigger nurture actions and set up closed-loop attribution.</p>"
-  }
+    {
+        "title":  "The 2025 seller intelligence report",
+        "slug":  "2025-seller-intelligence-report",
+        "category":  "Download",
+        "description":  "Discover which homeowner behaviors predict listings in 2025 and how to activate them.",
+        "image":  "/images/resources/resource-4.svg",
+        "publishDate":  "2025-08-01",
+        "readingTime":  "15 min",
+        "body":  "\u003ch2\u003eInside the 2025 Seller Intelligence Report\u003c/h2\u003e\u003cul\u003e\u003cli\u003eThe three data signals that forecast listings with 92% accuracy.\u003c/li\u003e\u003cli\u003eTerritory heat maps to plan budget by micro-market.\u003c/li\u003e\u003cli\u003ePlaybooks for activating high propensity sellers across channels.\u003c/li\u003e\u003c/ul\u003e"
+    },
+    {
+        "title":  "Three nurture flows that convert seller leads",
+        "slug":  "nurture-flows-seller-leads",
+        "category":  "Blog",
+        "description":  "Automated sequences proven to move homeowners from interest to appointment.",
+        "image":  "/images/resources/resource-5.svg",
+        "publishDate":  "2025-07-18",
+        "readingTime":  "6 min",
+        "body":  "\u003ch3\u003eFlow 1: Hyper-local welcome\u003c/h3\u003e\u003cp\u003eSend three touches within the first week referencing local market stats.\u003c/p\u003e"
+    },
+    {
+        "title":  "SmartLead x HubSpot integration guide",
+        "slug":  "smartlead-hubspot-integration",
+        "category":  "Download",
+        "description":  "Step-by-step workbook to sync SmartLead campaigns to HubSpot workflows.",
+        "image":  "/images/resources/resource-6.svg",
+        "publishDate":  "2025-06-30",
+        "readingTime":  "10 min",
+        "body":  "\u003ch3\u003eMapping SmartLead to HubSpot\u003c/h3\u003e\u003cp\u003eUse deal stages to trigger nurture actions and set up closed-loop attribution.\u003c/p\u003e"
+    },
+    {
+        "title":  "Live demo: Predictive listing intelligence",
+        "slug":  "live-demo-predictive-listing-intelligence",
+        "category":  "Webinar",
+        "description":  "See how SmartLead surfaces homeowners most likely to sell in your market.",
+        "image":  "/images/resources/resource-7.svg",
+        "publishDate":  "2025-09-10",
+        "readingTime":  "50 min",
+        "body":  "\u003ch3\u003eWhat you will see in the live demo\u003c/h3\u003e\u003cul\u003e\u003cli\u003ePredictive seller scoring inside the territory planner.\u003c/li\u003e\u003cli\u003eHow campaigns adapt when inventory levels change.\u003c/li\u003e\u003cli\u003eWays to hand off hot opportunities to your CRM automatically.\u003c/li\u003e\u003c/ul\u003e"
+    }
 ]

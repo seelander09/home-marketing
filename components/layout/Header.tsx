@@ -1,6 +1,6 @@
-﻿import Link from 'next/link'
 import { Logo } from '@/components/layout/Logo'
 import { MainNav } from '@/components/layout/MainNav'
+import { SmartLink } from '@/components/ui/SmartLink'
 import type { CTA } from '@/lib/cms/types'
 
 export function Header({ navigation, cta }: { navigation: CTA[]; cta: CTA }) {
@@ -10,9 +10,9 @@ export function Header({ navigation, cta }: { navigation: CTA[]; cta: CTA }) {
         <Logo />
         <div className="flex items-center gap-6">
           <MainNav items={navigation} cta={cta} />
-          <Link href={cta.href} className="btn btn-primary hidden lg:inline-flex">
+          <SmartLink href={cta.href} className="btn btn-primary hidden lg:inline-flex">
             {cta.label}
-          </Link>
+          </SmartLink>
         </div>
       </div>
     </header>

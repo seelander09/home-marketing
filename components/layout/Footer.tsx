@@ -1,5 +1,5 @@
-﻿import Link from 'next/link'
 import { Logo } from '@/components/layout/Logo'
+import { SmartLink } from '@/components/ui/SmartLink'
 import type { CTA } from '@/lib/cms/types'
 
 export function Footer({
@@ -23,18 +23,18 @@ export function Footer({
         <div className="space-y-6">
           <Logo />
           <p className="max-w-xl text-base text-white/70">{description}</p>
-          <Link href={cta.href} className="btn btn-primary inline-flex">
+          <SmartLink href={cta.href} className="btn btn-primary inline-flex">
             {cta.label}
-          </Link>
+          </SmartLink>
         </div>
         <div>
           <h3 className="text-lg font-semibold text-white">Connect</h3>
           <ul className="mt-4 space-y-2 text-white/70">
             {social.map((item) => (
               <li key={item.href}>
-                <Link className="hover:text-brand-orange" href={item.href}>
+                <SmartLink className="hover:text-brand-orange" href={item.href}>
                   {item.label}
-                </Link>
+                </SmartLink>
               </li>
             ))}
           </ul>
@@ -44,9 +44,9 @@ export function Footer({
           <ul className="mt-4 space-y-2 text-white/60">
             {legal.map((item) => (
               <li key={item.href}>
-                <Link className="hover:text-brand-orange" href={item.href}>
+                <SmartLink className="hover:text-brand-orange" href={item.href}>
                   {item.label}
-                </Link>
+                </SmartLink>
               </li>
             ))}
           </ul>
@@ -55,9 +55,9 @@ export function Footer({
       <div className="border-t border-white/10 py-6">
         <div className="container flex flex-col gap-2 text-sm text-white/50 sm:flex-row sm:items-center sm:justify-between">
           <p>© {year} SmartLead Marketing. All rights reserved.</p>
-          <Link href="/accessibility" className="hover:text-brand-orange">
+          <SmartLink href="/accessibility" className="hover:text-brand-orange">
             Accessibility Statement
-          </Link>
+          </SmartLink>
         </div>
       </div>
     </footer>

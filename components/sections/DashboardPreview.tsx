@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useMemo } from 'react'
 import {
@@ -36,7 +36,16 @@ function renderWidget(widget: DashboardWidget) {
   if (widget.chartType === 'doughnut') {
     return <Doughnut data={data} options={{ responsive: true, maintainAspectRatio: false, cutout: '65%' }} />
   }
-  return <Line data={data} options={{ responsive: true, maintainAspectRatio: false, tension: 0.4 }} />
+  return (
+    <Line
+      data={data}
+      options={{
+        responsive: true,
+        maintainAspectRatio: false,
+        elements: { line: { tension: 0.4 } }
+      }}
+    />
+  )
 }
 
 export function DashboardPreview({ config }: { config: DashboardConfig }) {

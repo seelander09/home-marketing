@@ -1,7 +1,7 @@
-﻿'use client'
+'use client'
 
-import Link from 'next/link'
 import { useState } from 'react'
+import { SmartLink } from '@/components/ui/SmartLink'
 import type { CTA } from '@/lib/cms/types'
 import { cn } from '@/lib/utils'
 
@@ -29,25 +29,25 @@ export function MainNav({ items, cta }: { items: CTA[]; cta: CTA }) {
         )}
       >
         {items.map((item) => (
-          <Link
+          <SmartLink
             key={item.href}
             href={item.href}
             className="text-lg font-semibold text-white hover:text-brand-orange"
             onClick={() => setOpen(false)}
           >
             {item.label}
-          </Link>
+          </SmartLink>
         ))}
-        <Link href={cta.href} className="btn btn-primary" onClick={() => setOpen(false)}>
+        <SmartLink href={cta.href} className="btn btn-primary" onClick={() => setOpen(false)}>
           {cta.label}
-        </Link>
+        </SmartLink>
       </div>
       <ul className="hidden items-center gap-8 text-sm font-semibold text-white lg:flex">
         {items.map((item) => (
           <li key={item.href}>
-            <Link className="hover:text-brand-orange focus-ring" href={item.href}>
+            <SmartLink className="hover:text-brand-orange focus-ring" href={item.href}>
               {item.label}
-            </Link>
+            </SmartLink>
           </li>
         ))}
       </ul>

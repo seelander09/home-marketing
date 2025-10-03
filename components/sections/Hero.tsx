@@ -1,13 +1,13 @@
-﻿"use client"
+"use client"
 
 import Image from 'next/image'
-import Link from 'next/link'
-import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import type { HeroSection, Metric } from '@/lib/cms/types'
-import { VideoModal } from '@/components/shared/VideoModal'
-import { cn } from '@/lib/utils'
+import { useMemo, useState } from 'react'
 import CountUp from 'react-countup'
+import { SmartLink } from '@/components/ui/SmartLink'
+import { VideoModal } from '@/components/shared/VideoModal'
+import type { HeroSection, Metric } from '@/lib/cms/types'
+import { cn } from '@/lib/utils'
 
 type HeroProps = {
   content: HeroSection
@@ -58,16 +58,21 @@ export function Hero({ content, metrics = [] }: HeroProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.5 }}
           >
-            <Link href={primaryCta.href} className="btn btn-primary">
+            <SmartLink href={primaryCta.href} className="btn btn-primary">
               {primaryCta.label}
-            </Link>
+            </SmartLink>
             {secondaryCta ? (
-              <Link
+              <SmartLink
                 href={secondaryCta.href}
-                className={cn('btn', secondaryCta.variant === 'secondary' ? 'btn-secondary' : 'btn-secondary bg-white/15 text-white hover:bg-white/25')}
+                className={cn(
+                  'btn',
+                  secondaryCta.variant === 'secondary'
+                    ? 'btn-secondary'
+                    : 'btn-secondary bg-white/15 text-white hover:bg-white/25'
+                )}
               >
                 {secondaryCta.label}
-              </Link>
+              </SmartLink>
             ) : null}
             {video ? (
               <button

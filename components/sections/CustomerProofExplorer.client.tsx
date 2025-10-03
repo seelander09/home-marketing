@@ -1,8 +1,10 @@
-﻿"use client"
+"use client"
 
 import { useMemo, useState } from 'react'
 import { MapContainer, TileLayer, CircleMarker, Tooltip } from 'react-leaflet'
+import type { LatLngExpression } from 'leaflet'
 import type { ProofExplorerConfig, ProofMarket } from '@/lib/cms/types'
+import { cn, formatNumber } from '@/lib/utils'
 import 'leaflet/dist/leaflet.css'
 
 const inventoryColor: Record<string, string> = {
@@ -11,10 +13,24 @@ const inventoryColor: Record<string, string> = {
   'High turnover': '#4DD4AC'
 }
 
-const defaultCenter = { lat: 38, lng: -97 }
+const currencyFormatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  maximumFractionDigits: 0
+})
+
+const defaultCenter: LatLngExpression = [38, -97]
 
 function getColor(level: string) {
   return inventoryColor[level] || '#0BADD5'
+}
+
+function formatCurrency(value: number) {
+  return currencyFormatter.format(Math.max(0, Math.round(value)))
+}
+
+function getAssetHref(assetId?: string) {
+  return assetId ? `/downloads/${assetId}.pdf` : null
 }
 
 export function CustomerProofExplorerClient({ config }: { config: ProofExplorerConfig }) {
@@ -29,13 +45,13 @@ export function CustomerProofExplorerClient({ config }: { config: ProofExplorerC
     })
   }, [config.markets, marketType, inventoryLevel])
 
-  const center = useMemo(() => {
+  const mapCenter = useMemo<LatLngExpression>(() => {
     if (!filteredMarkets.length) {
       return defaultCenter
     }
     const lat = filteredMarkets.reduce((acc, market) => acc + market.latitude, 0) / filteredMarkets.length
     const lng = filteredMarkets.reduce((acc, market) => acc + market.longitude, 0) / filteredMarkets.length
-    return { lat, lng }
+    return [lat, lng]
   }, [filteredMarkets])
 
   return (
@@ -57,8 +73,8 @@ export function CustomerProofExplorerClient({ config }: { config: ProofExplorerC
       <div className="grid gap-6 lg:grid-cols-[1.1fr,1fr]">
         <div className="h-[420px] overflow-hidden rounded-3xl border border-brand-navy/10 shadow-card">
           <MapContainer
-            key={${marketType}-}
-            center={[center.lat, center.lng]}
+            key={`${marketType}-${inventoryLevel}`}
+            center={mapCenter}
             zoom={filteredMarkets.length > 1 ? 5 : 7}
             scrollWheelZoom={false}
             style={{ height: '100%', width: '100%' }}
@@ -69,8 +85,8 @@ export function CustomerProofExplorerClient({ config }: { config: ProofExplorerC
             />
             {filteredMarkets.map((market) => (
               <CircleMarker
-                key={${market.city}-}
-                center={[market.latitude, market.longitude]}
+                key={`${market.name}-${market.city}`}
+                center={[market.latitude, market.longitude] as LatLngExpression}
                 radius={12}
                 weight={2}
                 color={getColor(market.inventoryLevel)}
@@ -80,11 +96,12 @@ export function CustomerProofExplorerClient({ config }: { config: ProofExplorerC
                   <div className="space-y-1">
                     <p className="font-semibold">{market.name}</p>
                     <p className="text-sm text-brand-navy/70">
-                      {market.city}, {market.state} · {market.marketType}
+                      {market.city}, {market.state} - {market.marketType}
                     </p>
                     <p className="text-xs text-brand-navy/60">
-                      Seller intent score {market.sellerIntentScore} · Avg days on market {market.avgDaysOnMarket}
+                      Seller intent score {market.sellerIntentScore} - Avg days on market {market.avgDaysOnMarket}
                     </p>
+                    <p className="text-xs text-brand-navy/60">Closed volume {formatCurrency(market.closedVolume * 1_000_000)}</p>
                   </div>
                 </Tooltip>
               </CircleMarker>
@@ -93,7 +110,7 @@ export function CustomerProofExplorerClient({ config }: { config: ProofExplorerC
         </div>
         <div className="space-y-4">
           {filteredMarkets.map((market) => (
-            <MarketCard key={${market.name}-} market={market} />
+            <MarketCard key={`${market.name}-${market.city}`} market={market} />
           ))}
           {!filteredMarkets.length ? (
             <p className="rounded-3xl border border-brand-navy/10 bg-surface-subtle p-5 text-sm text-brand-navy/70">
@@ -125,7 +142,10 @@ function FilterGroup({
           <button
             key={option}
             type="button"
-            className={ounded-full px-4 py-2 text-xs font-semibold transition }
+            className={cn(
+              'rounded-full border border-brand-navy/10 px-4 py-2 text-xs font-semibold text-brand-navy/70 transition hover:border-brand-turquoise hover:text-brand-navy',
+              option === active && 'border-brand-turquoise bg-brand-turquoise/10 text-brand-navy'
+            )}
             onClick={() => onSelect(option)}
           >
             {option}
@@ -137,13 +157,15 @@ function FilterGroup({
 }
 
 function MarketCard({ market }: { market: ProofMarket }) {
+  const assetHref = getAssetHref(market.pdfAssetId)
+
   return (
     <div className="rounded-3xl border border-brand-navy/10 bg-white p-5 shadow-card">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-semibold text-brand-navy">{market.name}</p>
           <p className="text-xs text-brand-navy/50">
-            {market.city}, {market.state} · {market.marketType}
+            {market.city}, {market.state} - {market.marketType}
           </p>
         </div>
         <span className="rounded-full bg-brand-orange/10 px-3 py-1 text-xs font-semibold text-brand-orange">
@@ -153,13 +175,13 @@ function MarketCard({ market }: { market: ProofMarket }) {
       <ul className="mt-3 grid gap-1 text-xs text-brand-navy/70">
         <li>Seller intent score {market.sellerIntentScore}</li>
         <li>Avg. days on market {market.avgDaysOnMarket}</li>
-        <li>Closed volume M</li>
+        <li>Closed volume {formatNumber(market.closedVolume)}M</li>
       </ul>
       {market.caseStudySummary ? (
         <p className="mt-3 text-sm text-brand-navy/80">{market.caseStudySummary}</p>
       ) : null}
-      {market.pdfAssetId ? (
-        <a className="btn btn-secondary mt-4 inline-flex" href={/downloads/.pdf} download>
+      {assetHref ? (
+        <a className="btn btn-secondary mt-4 inline-flex" href={assetHref} download>
           Download case study
         </a>
       ) : null}

@@ -2,9 +2,17 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import type { FAQItem, RoiScenario } from '@/lib/cms/types'
-import { Textarea } from '@/components/ui/Input'\nimport { Button } from '@/components/ui/Button'\nimport { formatNumber } from '@/lib/utils'
+import { Textarea } from '@/components/ui/Input'
+import { Button } from '@/components/ui/Button'
+import { formatNumber } from '@/lib/utils'
 
 const ROI_STORAGE_KEY = 'smartlead-roi-result'
+
+const currencyFormatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  maximumFractionDigits: 0
+})
 
 type ChatMessage = {
   from: 'user' | 'bot'
@@ -33,6 +41,14 @@ const defaultContext: ChatContext = {
   caseStudies: [],
   markets: [],
   roiScenarios: []
+}
+
+function formatCurrency(value: number) {
+  return currencyFormatter.format(Math.max(0, Math.round(value)))
+}
+
+function getAssetHref(assetId?: string) {
+  return assetId ? `/downloads/${assetId}.pdf` : null
 }
 
 export function ChatAssistant() {
@@ -96,7 +112,7 @@ export function ChatAssistant() {
     if (!input.trim()) return
 
     const userText = input.trim()
-    const response = buildResponse(userText.toLowerCase(), context, roiSnapshot)
+    const response = buildResponse(userText, context, roiSnapshot)
     setMessages((prev) => [...prev, { from: 'user', text: userText }, { from: 'bot', text: response }])
     setInput('')
   }
@@ -120,12 +136,12 @@ export function ChatAssistant() {
         {open ? 'Close concierge' : 'Ask SmartLead'}
       </button>
       <div
-        className={mt-4 w-80 rounded-3xl border border-brand-navy/10 bg-white p-4 shadow-card transition-all duration-200 }
+        className={`mt-4 w-80 rounded-3xl border border-brand-navy/10 bg-white p-4 shadow-card transition-all duration-200 ${containerClasses}`}
       >
         <div className="max-h-64 space-y-3 overflow-y-auto pr-2 text-sm text-brand-navy/80">
           {messages.map((message, index) => (
             <div
-              key={${message.from}-}
+              key={`${message.from}-${index}`}
               className={
                 message.from === 'bot'
                   ? 'rounded-2xl bg-surface-subtle p-3'
@@ -141,7 +157,7 @@ export function ChatAssistant() {
             rows={2}
             value={input}
             onChange={(event) => setInput(event.target.value)}
-            placeholder="Ask about ROI, proof points, or next steps…"
+            placeholder="Ask about ROI, proof points, or next steps."
           />
           <div className="flex items-center justify-between text-xs text-brand-navy/40">
             <span>{roiSnapshot ? 'ROI data synced' : 'ROI data not yet captured'}</span>
@@ -151,14 +167,16 @@ export function ChatAssistant() {
           </div>
         </form>
         <p className="mt-2 text-xs text-brand-navy/50">
-          Need a human? Mention “handoff” and I’ll schedule time with a strategist.
+          Need a human? Mention "handoff" and I will schedule time with a strategist.
         </p>
       </div>
     </div>
   )
 }
 
-function buildResponse(message: string, context: ChatContext, roiSnapshot: StoredRoi | null) {
+function buildResponse(rawMessage: string, context: ChatContext, roiSnapshot: StoredRoi | null) {
+  const message = rawMessage.toLowerCase()
+
   if (message.includes('handoff') || message.includes('call') || message.includes('demo')) {
     return 'I can loop in a strategist right away. Share your territory and preferred time on the demo form and we will confirm within one business day.'
   }
@@ -168,33 +186,43 @@ function buildResponse(message: string, context: ChatContext, roiSnapshot: Store
     if (highlights.length) {
       const details = highlights
         .map((item) => {
-          const link = item.pdfAssetId ?  — download at /downloads/.pdf : ''
-          return •  () 
+          const tag = item.market ? ` (${item.market})` : ''
+          const link = getAssetHref(item.pdfAssetId)
+          return `\u2022 ${item.title}${tag}${link ? ` \u2014 Download: ${link}` : ''}`
         })
         .join('\n')
-      return Here are a couple of SmartLead wins you might like:\n
+      return `Here are a couple of SmartLead wins you might like:\n${details}`
     }
   }
 
   if (roiSnapshot && (message.includes('roi') || message.includes('return') || message.includes('budget'))) {
-    return Based on your  scenario,  listings a year translate to ~{formatNumber(roiSnapshot.revenue)} in influenced revenue and a x return. Ready for a tailored walkthrough?
+    const influencedRevenue = formatCurrency(roiSnapshot.revenue)
+    const influencedDeals = formatNumber(roiSnapshot.influencedDeals)
+    return `Based on your ${roiSnapshot.scenarioLabel} scenario, ${influencedDeals} listings a year translate to roughly ${influencedRevenue} in influenced revenue and a ${roiSnapshot.roi.toFixed(1)}x return. Ready for a tailored walkthrough?`
   }
 
-  const marketMatch = context.markets.find((market) => message.includes(market.marketType.toLowerCase()) || message.includes(market.inventoryLevel.toLowerCase()))
+  const marketMatch = context.markets.find(
+    (market) =>
+      message.includes(market.name.toLowerCase()) ||
+      message.includes(market.marketType.toLowerCase()) ||
+      message.includes(market.inventoryLevel.toLowerCase())
+  )
   if (marketMatch) {
-    const extra = marketMatch.pdfAssetId ? You can grab the full case study at /downloads/.pdf. : ''
-    return ${marketMatch.name} is a  partner thriving in a  inventory environment. 
+    const link = getAssetHref(marketMatch.pdfAssetId)
+    const closing = link ? ` You can grab the full case study at ${link}.` : ''
+    return `${marketMatch.name} is a ${marketMatch.marketType.toLowerCase()} partner thriving in a ${marketMatch.inventoryLevel.toLowerCase()} inventory environment.${closing}`
   }
 
-  const faq = context.faqs.find((item) => item.question.toLowerCase().includes(message))
+  const faq = context.faqs.find((item) => message.includes(item.question.toLowerCase()))
   if (faq) {
-    return ${faq.answer}\nWant to dig deeper? I can share dashboards or schedule a strategist.
+    return `${faq.answer}\nWant to dig deeper? I can share dashboards or schedule a strategist.`
   }
 
   if (context.faqs.length) {
-    return ${context.faqs[0].answer}\nAsk about ROI, case studies, or request a strategist whenever you're ready.
+    const fallback = context.faqs[0]
+    return `${fallback.answer}\nAsk about ROI, case studies, or request a strategist whenever you're ready.`
   }
 
-  return 'Happy to help! Ask about ROI, market proof, or say “handoff” when you want to speak with a strategist.'
+  return 'Happy to help! Ask about ROI, market proof, or say "handoff" when you want to speak with a strategist.'
 }
 

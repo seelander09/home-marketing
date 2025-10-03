@@ -1,4 +1,4 @@
-﻿import type { Metadata } from 'next'
+import type { Metadata } from 'next'
 import { DashboardPreview } from '@/components/sections/DashboardPreview'
 import type { DashboardConfig } from '@/lib/cms/types'
 

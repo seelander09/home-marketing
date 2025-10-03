@@ -1,4 +1,4 @@
-﻿import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { demoRequestSchema } from '@/lib/forms/schemas'
 import { verifyRecaptcha } from '@/lib/forms/recaptcha'
 import { findTerritory } from '@/lib/forms/territory'
@@ -27,20 +27,11 @@ export async function POST(request: Request) {
   })
 
   try {
-    const { recaptchaToken, ...lead } = payload
-    await sendToCrm(
-      {
-        ...lead,
-        territory: {
-          ...lead.territory,
-          matches: territoryMatches
-        }
-      },
-      'demo-request'
-    )
+    await sendToCrm(payload, 'demo-request')
   } catch (error) {
     return NextResponse.json({ error: 'Failed to send demo request to CRM' }, { status: 502 })
   }
 
   return NextResponse.json({ success: true, territoryMatches })
 }
+

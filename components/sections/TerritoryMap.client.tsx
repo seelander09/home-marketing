@@ -1,10 +1,17 @@
-﻿"use client"
+"use client"
 
 import { MapContainer, TileLayer, CircleMarker, Tooltip } from 'react-leaflet'
+import type { LatLngExpression } from 'leaflet'
 import type { TerritoryDatasetEntry } from '@/lib/cms/types'
 import 'leaflet/dist/leaflet.css'
 
-const defaultCenter = { lat: 38, lng: -97 }
+const currencyFormatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  maximumFractionDigits: 0
+})
+
+const defaultCenter: LatLngExpression = [38, -97]
 
 function scoreToColor(score: number) {
   if (score >= 90) return '#FF564F'
@@ -12,12 +19,26 @@ function scoreToColor(score: number) {
   return '#4DD4AC'
 }
 
+function formatCurrency(value: number) {
+  return currencyFormatter.format(Math.max(0, Math.round(value)))
+}
+
+function formatTurnover(value: number | undefined) {
+  if (typeof value !== 'number') {
+    return 'N/A'
+  }
+  return `${(value * 100).toFixed(1)}%`
+}
+
 export function TerritoryMapClient({ dataset }: { dataset: TerritoryDatasetEntry[] }) {
   const latitudes = dataset.map((entry) => entry.latitude).filter((value): value is number => typeof value === 'number')
   const longitudes = dataset.map((entry) => entry.longitude).filter((value): value is number => typeof value === 'number')
 
-  const center = latitudes.length && longitudes.length
-    ? { lat: latitudes.reduce((acc, value) => acc + value, 0) / latitudes.length, lng: longitudes.reduce((acc, value) => acc + value, 0) / longitudes.length }
+  const center: LatLngExpression = latitudes.length && longitudes.length
+    ? [
+        latitudes.reduce((acc, value) => acc + value, 0) / latitudes.length,
+        longitudes.reduce((acc, value) => acc + value, 0) / longitudes.length
+      ]
     : defaultCenter
 
   return (
@@ -29,7 +50,7 @@ export function TerritoryMapClient({ dataset }: { dataset: TerritoryDatasetEntry
       {dataset.map((entry) => (
         <CircleMarker
           key={entry.zip}
-          center={[entry.latitude ?? defaultCenter.lat, entry.longitude ?? defaultCenter.lng]}
+          center={[entry.latitude ?? (defaultCenter as [number, number])[0], entry.longitude ?? (defaultCenter as [number, number])[1]] as LatLngExpression}
           radius={12}
           weight={2}
           color={scoreToColor(entry.score)}
@@ -39,8 +60,8 @@ export function TerritoryMapClient({ dataset }: { dataset: TerritoryDatasetEntry
             <div className="space-y-1">
               <p className="font-semibold">{entry.city}, {entry.state} {entry.zip}</p>
               <p>Seller intent score: {entry.score}</p>
-              <p>Median home value: </p>
-              <p>Turnover: {(entry.turnoverRate * 100).toFixed(1)}%</p>
+              <p>Median home value: {formatCurrency(entry.medianHomeValue)}</p>
+              <p>Turnover: {formatTurnover(entry.turnoverRate)}</p>
             </div>
           </Tooltip>
         </CircleMarker>

@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useCallback, useEffect, useState } from 'react'
 import { GuideDownloadForm } from '@/components/forms/GuideDownloadForm'
@@ -43,7 +43,7 @@ export function ExitIntentModal() {
           onClick={close}
           aria-label="Close exit intent modal"
         >
-          ✕
+          ?
         </button>
         <p className="text-sm font-semibold uppercase tracking-[0.3em] text-brand-navy/50">Don't leave without your guide</p>
         <h2 className="mt-3 text-2xl font-semibold text-brand-navy">Unlock the 2025 Seller Playbook</h2>

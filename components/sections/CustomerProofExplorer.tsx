@@ -1,14 +1,8 @@
-﻿import dynamic from 'next/dynamic'
-import type { ProofExplorerConfig } from '@/lib/cms/types'
+"use client"
 
-const ProofExplorerClient = dynamic(() => import('./CustomerProofExplorer.client').then((mod) => mod.CustomerProofExplorerClient), {
-  ssr: false,
-  loading: () => (
-    <div className="flex h-[420px] w-full items-center justify-center rounded-3xl border border-brand-navy/10 bg-surface-subtle shadow-card">
-      Loading territory insight...
-    </div>
-  )
-})
+import { CustomerProofExplorerClient } from './CustomerProofExplorer.client'
+import { SmartLink } from '@/components/ui/SmartLink'
+import type { ProofExplorerConfig } from '@/lib/cms/types'
 
 export function CustomerProofExplorer({ config }: { config: ProofExplorerConfig }) {
   if (!config?.markets?.length) {
@@ -25,11 +19,11 @@ export function CustomerProofExplorer({ config }: { config: ProofExplorerConfig 
           <p className="text-sm text-brand-navy/60">
             Filter by market style or inventory pressure to see how SmartLead partners activate winning territories.
           </p>
-          <a className="btn btn-primary inline-flex" href={config.cta.href}>
+          <SmartLink className="btn btn-primary inline-flex" href={config.cta.href}>
             {config.cta.label}
-          </a>
+          </SmartLink>
         </div>
-        <ProofExplorerClient config={config} />
+        <CustomerProofExplorerClient config={config} />
       </div>
     </section>
   )
