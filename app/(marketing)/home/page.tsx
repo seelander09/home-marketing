@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Hero } from '@/components/sections/Hero'
 import { LogoCarousel } from '@/components/sections/LogoCarousel'
 import { FeatureGrid } from '@/components/sections/FeatureGrid'
+import { EquityReadiness } from '@/components/sections/EquityReadiness'
 import { TestimonialCarousel } from '@/components/sections/TestimonialCarousel'
 import { GuideOfferSection } from '@/components/sections/GuideOfferSection'
 import { RoiCalculator } from '@/components/sections/RoiCalculator'
@@ -13,6 +14,7 @@ import { JourneyTimeline } from '@/components/sections/JourneyTimeline'
 import { ResourceHighlights } from '@/components/sections/ResourceHighlights'
 import { FAQAccordion } from '@/components/sections/FAQAccordion'
 import { getHomePage } from '@/lib/cms/getContent'
+import { getEquityInsights } from '@/lib/insights/realie'
 
 export async function generateMetadata(): Promise<Metadata> {
   const home = await getHomePage()
@@ -26,12 +28,14 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function HomePage() {
   const home = await getHomePage()
+  const equityInsights = await getEquityInsights({ limit: 3 })
 
   return (
     <>
       <Hero content={home.hero} metrics={home.metrics} />
       <LogoCarousel logos={home.logos} />
       <FeatureGrid features={home.features} />
+      <EquityReadiness config={home.equityReadiness} insights={equityInsights} />
       <RoiCalculator config={home.roiCalculator} />
       <TestimonialCarousel testimonials={home.testimonials.items} headline={home.testimonials.headline} />
       <CaseStudiesCarousel block={home.caseStudies} />

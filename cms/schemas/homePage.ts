@@ -27,6 +27,17 @@ export default defineType({
     }),
     defineField({ name: 'features', type: 'array', of: [{ type: 'featureCard' }] }),
     defineField({
+      name: 'equityReadiness',
+      type: 'object',
+      fields: [
+        defineField({ name: 'eyebrow', type: 'string' }),
+        defineField({ name: 'headline', type: 'string' }),
+        defineField({ name: 'description', type: 'text' }),
+        defineField({ name: 'bullets', type: 'array', of: [{ type: 'string' }] }),
+        defineField({ name: 'cta', type: 'cta' })
+      ]
+    }),
+    defineField({
       name: 'testimonials',
       type: 'object',
       fields: [

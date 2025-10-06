@@ -31,6 +31,7 @@ export async function GET() {
       roiScenarios: home.roiCalculator?.scenarios ?? []
     })
   } catch (error) {
+    console.error('Failed to load chat context', error)
     return NextResponse.json({ error: 'Failed to load chat context' }, { status: 500 })
   }
 }

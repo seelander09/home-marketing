@@ -17,6 +17,7 @@ function readConsentCookie(): Preferences | null {
   try {
     return JSON.parse(decodeURIComponent(cookie.split('=')[1])) as Preferences
   } catch (error) {
+    console.warn('Failed to parse consent cookie', error)
     return null
   }
 }

@@ -22,6 +22,7 @@ export function Footer({
       <div className="container grid gap-12 py-16 lg:grid-cols-[2fr,1fr,1fr]">
         <div className="space-y-6">
           <Logo />
+          <h2 className="text-2xl font-semibold text-white">{headline}</h2>
           <p className="max-w-xl text-base text-white/70">{description}</p>
           <SmartLink href={cta.href} className="btn btn-primary inline-flex">
             {cta.label}

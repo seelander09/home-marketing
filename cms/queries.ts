@@ -27,6 +27,13 @@
       icon,
       bullets
     },
+    equityReadiness {
+      eyebrow,
+      headline,
+      description,
+      bullets,
+      cta
+    },
     testimonials {
       headline,
       items[] {

@@ -26,6 +26,7 @@ export async function POST(request: Request) {
   try {
     await sendToCrm(payload, 'download-request')
   } catch (error) {
+    console.error('Failed to send download request to CRM', error)
     return NextResponse.json({ error: 'Failed to send to CRM' }, { status: 502 })
   }
 

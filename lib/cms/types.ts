@@ -90,6 +90,14 @@ export type RoiCalculatorConfig = {
   assumptions: string[]
 }
 
+export type EquityReadinessConfig = {
+  eyebrow: string
+  headline: string
+  description: string
+  bullets: string[]
+  cta?: CTA
+}
+
 export type CaseStudy = {
   title: string
   summary: string
@@ -182,6 +190,7 @@ export type HomePagePayload = {
   metrics: Metric[]
   logos: string[]
   features: Feature[]
+  equityReadiness?: EquityReadinessConfig
   testimonials: {
     headline: string
     items: Testimonial[]

@@ -45,7 +45,7 @@ export function ExitIntentModal() {
         >
           ?
         </button>
-        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-brand-navy/50">Don't leave without your guide</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-brand-navy/50">Don&apos;t leave without your guide</p>
         <h2 className="mt-3 text-2xl font-semibold text-brand-navy">Unlock the 2025 Seller Playbook</h2>
         <p className="mt-2 text-sm text-brand-navy/70">
           Discover the scripts, nurture flows, and territory heat maps top SmartLead brokers are using this quarter.

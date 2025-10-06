@@ -87,6 +87,21 @@
                                      ]
                      }
                  ],
+    "equityReadiness":  {
+                            "eyebrow":  "Equity Threshold Intelligence",
+                            "headline":  "Know when homeowners have enough equity to sell",
+                            "description":  "Realie equity telemetry blends loan payoff balances, projected closing costs, and the net cash sellers expect to bank so your team can focus outreach on owners who are actually ready to list.",
+                            "bullets":  [
+                                            "Break-even equity combines payoff amount, closing costs, and seller net goals",
+                                            "Median and percentile benchmarks sourced from recent Realie listing cohorts",
+                                            "Surface gaps early so nurture journeys can build perceived equity faster"
+                                        ],
+                            "cta":  {
+                                        "label":  "Explore equity insights",
+                                        "href":  "/contact#demo",
+                                        "variant":  "primary"
+                                    }
+                        },
     "testimonials":  {
                          "headline":  "Agents and brokerages scaling with SmartLead",
                          "items":  [

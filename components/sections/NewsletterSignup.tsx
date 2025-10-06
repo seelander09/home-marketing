@@ -23,8 +23,8 @@ export function NewsletterSignup({ block }: { block: NewsletterBlock }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, firstName: 'Friend', lastName: 'Marketer', assetId: 'newsletter', recaptchaToken: 'mock-token' })
       })
-    } catch (err) {
-      // marketing integration placeholder
+    } catch (error) {
+      console.warn('Newsletter signup failed', error)
     }
     setSubmitted(true)
   }

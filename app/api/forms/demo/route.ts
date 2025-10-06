@@ -29,6 +29,7 @@ export async function POST(request: Request) {
   try {
     await sendToCrm(payload, 'demo-request')
   } catch (error) {
+    console.error('Failed to send demo request to CRM', error)
     return NextResponse.json({ error: 'Failed to send demo request to CRM' }, { status: 502 })
   }
 

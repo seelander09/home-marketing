@@ -1,0 +1,53 @@
+[
+  {
+    "marketId": "austin-tx-78704",
+    "marketName": "Austin, TX 78704",
+    "medianHomeValue": 745000,
+    "medianLoanBalance": 412000,
+    "medianSellerGoal": 90000,
+    "closingCostRate": 0.075,
+    "medianEquityAtListing": 236000,
+    "equityPercentiles": {
+      "p25": 178000,
+      "p50": 236000,
+      "p75": 301000
+    },
+    "sampleSize": 186,
+    "medianDaysOnMarket": 21,
+    "lastUpdated": "2025-07-15"
+  },
+  {
+    "marketId": "scottsdale-az-85255",
+    "marketName": "Scottsdale, AZ 85255",
+    "medianHomeValue": 985000,
+    "medianLoanBalance": 518000,
+    "medianSellerGoal": 120000,
+    "closingCostRate": 0.072,
+    "medianEquityAtListing": 342000,
+    "equityPercentiles": {
+      "p25": 264000,
+      "p50": 342000,
+      "p75": 418000
+    },
+    "sampleSize": 142,
+    "medianDaysOnMarket": 28,
+    "lastUpdated": "2025-07-10"
+  },
+  {
+    "marketId": "seattle-wa-98107",
+    "marketName": "Seattle, WA 98107",
+    "medianHomeValue": 836000,
+    "medianLoanBalance": 446000,
+    "medianSellerGoal": 95000,
+    "closingCostRate": 0.078,
+    "medianEquityAtListing": 268000,
+    "equityPercentiles": {
+      "p25": 205000,
+      "p50": 268000,
+      "p75": 329000
+    },
+    "sampleSize": 198,
+    "medianDaysOnMarket": 18,
+    "lastUpdated": "2025-07-18"
+  }
+]

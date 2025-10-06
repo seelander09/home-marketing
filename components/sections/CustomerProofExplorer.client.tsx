@@ -1,11 +1,16 @@
 "use client"
 
 import { useMemo, useState } from 'react'
-import { MapContainer, TileLayer, CircleMarker, Tooltip } from 'react-leaflet'
+import dynamic from 'next/dynamic'
 import type { LatLngExpression } from 'leaflet'
 import type { ProofExplorerConfig, ProofMarket } from '@/lib/cms/types'
 import { cn, formatNumber } from '@/lib/utils'
 import 'leaflet/dist/leaflet.css'
+
+const MapContainer = dynamic(() => import('react-leaflet').then((mod) => mod.MapContainer), { ssr: false })
+const TileLayer = dynamic(() => import('react-leaflet').then((mod) => mod.TileLayer), { ssr: false })
+const CircleMarker = dynamic(() => import('react-leaflet').then((mod) => mod.CircleMarker), { ssr: false })
+const Tooltip = dynamic(() => import('react-leaflet').then((mod) => mod.Tooltip), { ssr: false })
 
 const inventoryColor: Record<string, string> = {
   Tight: '#FF564F',

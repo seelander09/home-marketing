@@ -91,6 +91,7 @@ export function ChatAssistant() {
         }
         setRoiSnapshot(JSON.parse(raw) as StoredRoi)
       } catch (error) {
+        console.warn('Failed to hydrate ROI snapshot', error)
         setRoiSnapshot(null)
       }
     }
@@ -167,7 +168,7 @@ export function ChatAssistant() {
           </div>
         </form>
         <p className="mt-2 text-xs text-brand-navy/50">
-          Need a human? Mention "handoff" and I will schedule time with a strategist.
+          Need a human? Mention &ldquo;handoff&rdquo; and I will schedule time with a strategist.
         </p>
       </div>
     </div>
@@ -223,6 +224,5 @@ function buildResponse(rawMessage: string, context: ChatContext, roiSnapshot: St
     return `${fallback.answer}\nAsk about ROI, case studies, or request a strategist whenever you're ready.`
   }
 
-  return 'Happy to help! Ask about ROI, market proof, or say "handoff" when you want to speak with a strategist.'
+  return 'Happy to help! Ask about ROI, market proof, or say \u201Chandoff\u201D when you want to speak with a strategist.'
 }
-

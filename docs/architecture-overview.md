@@ -60,6 +60,11 @@ public/
 3. Validated payload forwarded to CRM webhook (HubSpot/Salesforce) defined via env vars; responses logged to Vercel Edge LogDrain (or console locally).
 4. On success, gated asset URL returned; analytics events fired via GTM data layer.
 
+## Equity Insights
+- `lib/insights/realie.ts` calls the Realie Seller Equity API (or falls back to `/content/mock-data/realie-equity.json`) and normalizes market-level loan payoff, valuation, and equity distribution data.
+- `/api/insights/equity` exposes that dataset to the UI with optional `marketId` and `limit` filters.
+- `EquityReadiness` home page section blends Realie data with CMS copy to surface break-even equity thresholds, percentile benchmarks, and readiness scoring.
+
 ## Analytics & Consent
 - Consent banner persists user choices in encrypted cookies.
 - Tag Manager script only loads once marketing consent provided.
@@ -76,4 +81,5 @@ public/
 - Finalize territory dataset or API.
 - Upload brand assets (logos, imagery) to CMS / asset bucket.
 - Align legal copy with compliance team.
+- Validate Realie API contract (authentication, schema, rate limits) before production launch.
 

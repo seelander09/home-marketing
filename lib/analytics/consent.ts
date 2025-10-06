@@ -22,6 +22,7 @@ export function getConsentFromCookies(): ConsentState {
       necessary: true
     }
   } catch (error) {
+    console.warn('Failed to parse consent from cookies', error)
     return { analytics: false, marketing: false, necessary: true }
   }
 }

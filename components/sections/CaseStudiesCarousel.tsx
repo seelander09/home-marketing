@@ -84,7 +84,7 @@ export function CaseStudiesCarousel({ block }: { block: CaseStudiesBlock }) {
                     </ul>
                     {item.testimonial ? (
                       <blockquote className="rounded-2xl border border-brand-navy/10 bg-white p-4 text-sm text-brand-navy/70">
-                        "{item.testimonial.quote}"
+                        &ldquo;{item.testimonial.quote}&rdquo;
                         <footer className="mt-2 text-xs font-semibold text-brand-navy">
                           {item.testimonial.author}
                           {item.testimonial.role ? <span className="text-brand-navy/50"> - {item.testimonial.role}</span> : null}

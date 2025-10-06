@@ -45,7 +45,7 @@ export default async function ResourceDetailPage({ params }: { params: { slug: s
         </div>
       </article>
     )
-  } catch (error) {
+  } catch {
     notFound()
   }
 }

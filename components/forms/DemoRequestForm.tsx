@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { type FieldPath, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { demoRequestSchema } from '@/lib/forms/schemas'
@@ -20,7 +20,7 @@ const steps = [
   { title: 'Territory', description: 'Where do you want to grow?' }
 ]
 
-const stepFields: string[][] = [
+const stepFields: FieldPath<FormValues>[][] = [
   ['firstName', 'lastName', 'email', 'phone'],
   ['role', 'brokerage', 'crm', 'transactionsPerYear'],
   ['territory.city', 'territory.state', 'territory.zip', 'message']
@@ -83,10 +83,10 @@ export function DemoRequestForm() {
     return () => subscription.unsubscribe()
   }, [form])
 
-  const currentFields = useMemo(() => stepFields[step], [step])
+  const currentFields = useMemo<FieldPath<FormValues>[]>(() => stepFields[step], [step])
 
   const handleNext = async () => {
-    const valid = await form.trigger(currentFields as any)
+    const valid = await form.trigger(currentFields)
     if (!valid) return
     setStep((prev) => Math.min(prev + 1, steps.length - 1))
   }

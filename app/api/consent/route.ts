@@ -48,6 +48,7 @@ export async function POST(request: Request) {
   try {
     await sendToCrm(payload, 'do-not-sell')
   } catch (error) {
+    console.error('Failed to create compliance ticket', error)
     return NextResponse.json({ error: 'Failed to create compliance ticket' }, { status: 502 })
   }
 
