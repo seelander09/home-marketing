@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { EquityOpportunityDashboard } from '@/components/sections/EquityOpportunityDashboard'
 import { Hero } from '@/components/sections/Hero'
 import { LogoCarousel } from '@/components/sections/LogoCarousel'
 import { FeatureGrid } from '@/components/sections/FeatureGrid'
@@ -32,6 +33,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <EquityOpportunityDashboard />
       <Hero content={home.hero} metrics={home.metrics} />
       <LogoCarousel logos={home.logos} />
       <FeatureGrid features={home.features} />
