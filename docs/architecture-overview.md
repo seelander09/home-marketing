@@ -64,6 +64,7 @@ public/
 - `lib/insights/realie.ts` calls the Realie Seller Equity API (or falls back to `/content/mock-data/realie-equity.json`) and normalizes market-level loan payoff, valuation, and equity distribution data.
 - `/api/insights/equity` exposes that dataset to the UI with optional `marketId` and `limit` filters.
 - `EquityReadiness` home page section blends Realie data with CMS copy to surface break-even equity thresholds, percentile benchmarks, and readiness scoring.
+- `scripts/build-redfin-cache.mjs` digests Redfin market tracker TSVs into cache files under `REDFIN_CACHE_DIR` (state/city/zip); `lib/insights/redfin.ts` reads those JSON caches to surface current inventory, DOM, sale-to-list, and price metrics, served via `/api/market/redfin`.
 
 ## Analytics & Consent
 - Consent banner persists user choices in encrypted cookies.
@@ -82,4 +83,5 @@ public/
 - Upload brand assets (logos, imagery) to CMS / asset bucket.
 - Align legal copy with compliance team.
 - Validate Realie API contract (authentication, schema, rate limits) before production launch.
+- Expand Redfin ingestion scheduling (cron, queue) and persist caches in durable storage for multi-instance environments.
 

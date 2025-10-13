@@ -2,3 +2,8 @@ node_modules
 .next
 tsconfig.tsbuildinfo
 
+# Playwright test results
+test-results/
+playwright-report/
+playwright/.cache/
+

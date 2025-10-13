@@ -1,0 +1,372 @@
+import fs from 'fs/promises'
+import path from 'path'
+
+export type CensusDemographics = {
+  totalPopulation: number | null
+  medianAge: number | null
+  medianHouseholdIncome: number | null
+  povertyRate: number | null
+  educationLevel: {
+    highSchoolOrLess: number | null
+    someCollege: number | null
+    bachelorsOrHigher: number | null
+  }
+  employmentRate: number | null
+  unemploymentRate: number | null
+}
+
+export type CensusHousingData = {
+  geoid: string
+  regionType: 'state' | 'county' | 'place' | 'zip'
+  regionName: string
+  state: string
+  stateCode: string
+  totalHousingUnits: number | null
+  occupiedHousingUnits: number | null
+  ownerOccupiedUnits: number | null
+  renterOccupiedUnits: number | null
+  medianHomeValue: number | null
+  medianRent: number | null
+  medianGrossRent: number | null
+  occupancyRate: number | null
+  ownerOccupiedRate: number | null
+  renterOccupiedRate: number | null
+  housingUnitsBuilt: {
+    before1980: number | null
+    between1980and1999: number | null
+    between2000and2009: number | null
+    between2010and2019: number | null
+    after2020: number | null
+  }
+  medianYearBuilt: number | null
+  lastUpdated: string
+  demographics?: CensusDemographics
+}
+
+const CENSUS_API_KEY = process.env.CENSUS_API_KEY || '676987a71483dae833c0d8e3d732f8f2add95f88'
+const CENSUS_API_BASE = 'https://api.census.gov/data'
+const CACHE_DIR = path.resolve(process.cwd(), '..', 'census-data', 'cache')
+
+// ACS 5-Year Estimates Variables
+const ACS_VARIABLES = {
+  // Housing variables
+  B25001_001E: 'totalHousingUnits',
+  B25003_001E: 'totalOccupiedUnits',
+  B25003_002E: 'ownerOccupiedUnits', 
+  B25003_003E: 'renterOccupiedUnits',
+  B25077_001E: 'medianHomeValue',
+  B25064_001E: 'medianRent',
+  B25063_001E: 'medianGrossRent',
+  B25034_001E: 'totalUnitsByYearBuilt',
+  B25034_010E: 'unitsBuiltBefore1980',
+  B25034_011E: 'unitsBuilt1980to1989',
+  B25034_012E: 'unitsBuilt1990to1999',
+  B25034_013E: 'unitsBuilt2000to2009',
+  B25034_014E: 'unitsBuilt2010to2019',
+  B25034_015E: 'unitsBuiltAfter2020',
+  B25035_001E: 'medianYearBuilt',
+  
+  // Demographic variables
+  B01003_001E: 'totalPopulation',
+  B01002_001E: 'medianAge',
+  B19013_001E: 'medianHouseholdIncome',
+  B17001_002E: 'povertyCount',
+  B17001_001E: 'povertyTotal',
+  B15003_022E: 'bachelorsDegree',
+  B15003_023E: 'mastersDegree',
+  B15003_024E: 'professionalDegree',
+  B15003_025E: 'doctorateDegree',
+  B15003_001E: 'educationTotal',
+  B23025_002E: 'laborForce',
+  B23025_005E: 'unemployed',
+  B23025_007E: 'notInLaborForce'
+}
+
+type CacheKind = 'state' | 'county' | 'place' | 'zip'
+type CensusCache = Record<string, CensusHousingData>
+
+let stateCachePromise: Promise<CensusCache> | null = null
+let countyCachePromise: Promise<CensusCache> | null = null
+let placeCachePromise: Promise<CensusCache> | null = null
+let zipCachePromise: Promise<CensusCache> | null = null
+
+async function ensureCacheDir() {
+  try {
+    await fs.mkdir(CACHE_DIR, { recursive: true })
+  } catch (error) {
+    console.error('Failed to create census cache directory', error)
+  }
+}
+
+function parseNumber(value: string | undefined): number | null {
+  if (!value || value === '-666666666' || value === '-555555555' || value === 'null') {
+    return null
+  }
+  const parsed = Number.parseFloat(value)
+  return Number.isNaN(parsed) ? null : parsed
+}
+
+function calculateRates(occupied: number | null, total: number | null): number | null {
+  if (!occupied || !total || total === 0) return null
+  return (occupied / total) * 100
+}
+
+function buildCensusSnapshot(row: Record<string, string>, regionType: CacheKind): CensusHousingData {
+  const totalHousingUnits = parseNumber(row.B25001_001E)
+  const occupiedUnits = parseNumber(row.B25003_001E)
+  const ownerOccupied = parseNumber(row.B25003_002E)
+  const renterOccupied = parseNumber(row.B25003_003E)
+  
+  const demographics: CensusDemographics = {
+    totalPopulation: parseNumber(row.B01003_001E),
+    medianAge: parseNumber(row.B01002_001E),
+    medianHouseholdIncome: parseNumber(row.B19013_001E),
+    povertyRate: (() => {
+      const povertyCount = parseNumber(row.B17001_002E)
+      const povertyTotal = parseNumber(row.B17001_001E)
+      return calculateRates(povertyCount, povertyTotal)
+    })(),
+    educationLevel: {
+      highSchoolOrLess: (() => {
+        const total = parseNumber(row.B15003_001E)
+        const bachelors = parseNumber(row.B15003_022E) || 0
+        const masters = parseNumber(row.B15003_023E) || 0
+        const professional = parseNumber(row.B15003_024E) || 0
+        const doctorate = parseNumber(row.B15003_025E) || 0
+        const collegePlus = bachelors + masters + professional + doctorate
+        return total ? ((total - collegePlus) / total) * 100 : null
+      })(),
+      someCollege: null, // Would need additional variables
+      bachelorsOrHigher: (() => {
+        const total = parseNumber(row.B15003_001E)
+        const bachelors = parseNumber(row.B15003_022E) || 0
+        const masters = parseNumber(row.B15003_023E) || 0
+        const professional = parseNumber(row.B15003_024E) || 0
+        const doctorate = parseNumber(row.B15003_025E) || 0
+        const collegePlus = bachelors + masters + professional + doctorate
+        return total ? (collegePlus / total) * 100 : null
+      })()
+    },
+    employmentRate: (() => {
+      const laborForce = parseNumber(row.B23025_002E)
+      const unemployed = parseNumber(row.B23025_005E)
+      if (!laborForce || !unemployed) return null
+      return ((laborForce - unemployed) / laborForce) * 100
+    })(),
+    unemploymentRate: (() => {
+      const laborForce = parseNumber(row.B23025_002E)
+      const unemployed = parseNumber(row.B23025_005E)
+      return calculateRates(unemployed, laborForce)
+    })()
+  }
+
+  return {
+    geoid: row.geoid || '',
+    regionType,
+    regionName: row.NAME || '',
+    state: row.STATE_NAME || '',
+    stateCode: row.STATE || '',
+    totalHousingUnits,
+    occupiedHousingUnits: occupiedUnits,
+    ownerOccupiedUnits: ownerOccupied,
+    renterOccupiedUnits: renterOccupied,
+    medianHomeValue: parseNumber(row.B25077_001E),
+    medianRent: parseNumber(row.B25064_001E),
+    medianGrossRent: parseNumber(row.B25063_001E),
+    occupancyRate: calculateRates(occupiedUnits, totalHousingUnits),
+    ownerOccupiedRate: calculateRates(ownerOccupied, occupiedUnits),
+    renterOccupiedRate: calculateRates(renterOccupied, occupiedUnits),
+    housingUnitsBuilt: {
+      before1980: parseNumber(row.B25034_010E),
+      between1980and1999: (() => {
+        const eighties = parseNumber(row.B25034_011E) || 0
+        const nineties = parseNumber(row.B25034_012E) || 0
+        return eighties + nineties
+      })(),
+      between2000and2009: parseNumber(row.B25034_013E),
+      between2010and2019: parseNumber(row.B25034_014E),
+      after2020: parseNumber(row.B25034_015E)
+    },
+    medianYearBuilt: parseNumber(row.B25035_001E),
+    lastUpdated: new Date().toISOString(),
+    demographics
+  }
+}
+
+async function fetchCensusData(regionType: CacheKind): Promise<CensusCache> {
+  if (!CENSUS_API_KEY) {
+    console.warn('Census API key not provided, returning empty cache')
+    return {}
+  }
+
+  const year = '2022' // Latest 5-year ACS data
+  const variables = Object.keys(ACS_VARIABLES).join(',')
+  
+  let url: string
+  switch (regionType) {
+    case 'state':
+      url = `${CENSUS_API_BASE}/${year}/acs/acs5?get=NAME,${variables}&for=state:*&key=${CENSUS_API_KEY}`
+      break
+    case 'county':
+      url = `${CENSUS_API_BASE}/${year}/acs/acs5?get=NAME,${variables}&for=county:*&in=state:*&key=${CENSUS_API_KEY}`
+      break
+    case 'place':
+      url = `${CENSUS_API_BASE}/${year}/acs/acs5?get=NAME,${variables}&for=place:*&in=state:*&key=${CENSUS_API_KEY}`
+      break
+    case 'zip':
+      url = `${CENSUS_API_BASE}/${year}/acs/acs5?get=NAME,${variables}&for=zip%20code%20tabulation%20area:*&key=${CENSUS_API_KEY}`
+      break
+    default:
+      throw new Error(`Unsupported region type: ${regionType}`)
+  }
+
+  try {
+    console.log(`Fetching Census ${regionType} data...`)
+    const response = await fetch(url)
+    
+    if (!response.ok) {
+      throw new Error(`Census API responded with ${response.status}: ${response.statusText}`)
+    }
+
+    const data = await response.json()
+    
+    if (!Array.isArray(data) || data.length < 2) {
+      throw new Error('Invalid Census API response format')
+    }
+
+    const headers = data[0]
+    const rows = data.slice(1)
+    
+    const cache: CensusCache = {}
+    
+    for (const row of rows) {
+      if (!row || row.length !== headers.length) continue
+      
+      const rowData = headers.reduce((acc, header, index) => {
+        acc[header] = row[index]
+        return acc
+      }, {} as Record<string, string>)
+      
+      const snapshot = buildCensusSnapshot(rowData, regionType)
+      const key = getCacheKey(regionType, rowData)
+      
+      if (key) {
+        cache[key] = snapshot
+      }
+    }
+    
+    console.log(`Fetched ${Object.keys(cache).length} ${regionType} records from Census API`)
+    return cache
+    
+  } catch (error) {
+    console.error(`Failed to fetch Census ${regionType} data:`, error)
+    return {}
+  }
+}
+
+function getCacheKey(regionType: CacheKind, row: Record<string, string>): string | null {
+  switch (regionType) {
+    case 'state':
+      return row.state?.toUpperCase() || null
+    case 'county':
+      return `${row.state?.toUpperCase()}|${row.county}`
+    case 'place':
+      return `${row.state?.toUpperCase()}|${row.place}`
+    case 'zip':
+      return row['zip code tabulation area']
+    default:
+      return null
+  }
+}
+
+async function loadCache(kind: CacheKind): Promise<CensusCache> {
+  const filePath = path.join(CACHE_DIR, `${kind}.json`)
+  try {
+    const raw = await fs.readFile(filePath, 'utf-8')
+    const parsed = JSON.parse(raw) as CensusCache
+    return parsed
+  } catch (error) {
+    console.error(`Failed to read Census ${kind} cache from ${filePath}`, error)
+    return {}
+  }
+}
+
+async function getCache(kind: CacheKind): Promise<CensusCache> {
+  switch (kind) {
+    case 'state':
+      stateCachePromise = stateCachePromise ?? loadCache('state')
+      return stateCachePromise
+    case 'county':
+      countyCachePromise = countyCachePromise ?? loadCache('county')
+      return countyCachePromise
+    case 'place':
+      placeCachePromise = placeCachePromise ?? loadCache('place')
+      return placeCachePromise
+    case 'zip':
+      zipCachePromise = zipCachePromise ?? loadCache('zip')
+      return zipCachePromise
+  }
+}
+
+export async function getStateCensusData(stateCode: string): Promise<CensusHousingData | null> {
+  if (!stateCode) return null
+  const cache = await getCache('state')
+  return cache[stateCode.toUpperCase()] ?? null
+}
+
+export async function getCountyCensusData(stateCode: string, countyCode: string): Promise<CensusHousingData | null> {
+  if (!stateCode || !countyCode) return null
+  const cache = await getCache('county')
+  return cache[`${stateCode.toUpperCase()}|${countyCode}`] ?? null
+}
+
+export async function getPlaceCensusData(stateCode: string, placeCode: string): Promise<CensusHousingData | null> {
+  if (!stateCode || !placeCode) return null
+  const cache = await getCache('place')
+  return cache[`${stateCode.toUpperCase()}|${placeCode}`] ?? null
+}
+
+export async function getZipCensusData(zip: string): Promise<CensusHousingData | null> {
+  if (!zip) return null
+  const cache = await getCache('zip')
+  return cache[zip] ?? null
+}
+
+export async function buildCensusCache(): Promise<void> {
+  console.log('🏗  Building Census ACS cache...')
+  await ensureCacheDir()
+
+  const [stateData, countyData, placeData, zipData] = await Promise.all([
+    fetchCensusData('state'),
+    fetchCensusData('county'),
+    fetchCensusData('place'),
+    fetchCensusData('zip')
+  ])
+
+  const outputs = [
+    ['state.json', stateData],
+    ['county.json', countyData],
+    ['place.json', placeData],
+    ['zip.json', zipData]
+  ]
+
+  await Promise.all(
+    outputs.map(async ([filename, payload]) => {
+      const target = path.join(CACHE_DIR, filename)
+      await fs.writeFile(target, JSON.stringify(payload, null, 2))
+      console.log(`💾 Wrote ${Object.keys(payload).length.toLocaleString()} records to ${target}`)
+    })
+  )
+
+  console.log('✅ Census cache build complete')
+}
+
+export async function hasCensusCache(kind: CacheKind): Promise<boolean> {
+  const filePath = path.join(CACHE_DIR, `${kind}.json`)
+  try {
+    await fs.access(filePath)
+    return true
+  } catch {
+    return false
+  }
+}

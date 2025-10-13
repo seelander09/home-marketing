@@ -1,6 +1,6 @@
-"use client"
+﻿"use client"
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { cn, formatNumber } from '@/lib/utils'
@@ -10,6 +10,27 @@ import {
   type PropertyOpportunity
 } from '@/lib/insights/properties'
 
+type MarketSnapshot = {
+  regionType: 'state' | 'city' | 'zip'
+  regionName: string
+  state: string
+  stateCode: string
+  periodBegin: string
+  periodEnd: string
+  medianSalePrice: number | null
+  medianDom: number | null
+  inventory: number | null
+  monthsOfSupply: number | null
+  soldAboveList: number | null
+  priceDrops: number | null
+  newListings: number | null
+  pendingSales: number | null
+  avgSaleToList: number | null
+  lastUpdated: string | null
+  city?: string
+  zip?: string
+}
+
 const currencyFormatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
   currency: 'USD',
@@ -17,6 +38,11 @@ const currencyFormatter = new Intl.NumberFormat('en-US', {
 })
 
 const percentFormatter = new Intl.NumberFormat('en-US', {
+  maximumFractionDigits: 0
+})
+
+const percentOfOneFormatter = new Intl.NumberFormat('en-US', {
+  style: 'percent',
   maximumFractionDigits: 0
 })
 
@@ -32,12 +58,68 @@ export function EquityOpportunityDashboard() {
   const [minScore, setMinScore] = useState(DEFAULT_MIN_SCORE)
   const [minEquity, setMinEquity] = useState(DEFAULT_MIN_EQUITY)
   const [minYears, setMinYears] = useState(DEFAULT_MIN_YEARS)
+  const [marketSnapshot, setMarketSnapshot] = useState<MarketSnapshot | null>(null)
+  const [marketStatus, setMarketStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle')
+  const [marketQueryLabel, setMarketQueryLabel] = useState('')
 
   const allProperties = useMemo(() => listAllPropertyOpportunities(), [])
   const stateOptions = useMemo(
     () => Array.from(new Set(allProperties.map((property) => property.state))).sort(),
     [allProperties]
   )
+
+  useEffect(() => {
+    const normalizedZip = zip.trim()
+    const normalizedState = state.trim()
+    const normalizedCity = city.trim()
+
+    let url: string | null = null
+    let label = ''
+
+    if (normalizedZip.length >= 4) {
+      url = `/api/market/redfin?zip=${encodeURIComponent(normalizedZip)}`
+      label = `ZIP ${normalizedZip}`
+    } else if (normalizedCity && normalizedState) {
+      url = `/api/market/redfin?state=${encodeURIComponent(normalizedState)}&city=${encodeURIComponent(normalizedCity)}`
+      label = `${normalizedCity}, ${normalizedState.toUpperCase()}`
+    } else if (normalizedState) {
+      url = `/api/market/redfin?state=${encodeURIComponent(normalizedState)}`
+      label = normalizedState.toUpperCase()
+    }
+
+    if (!url) {
+      setMarketSnapshot(null)
+      setMarketStatus('idle')
+      setMarketQueryLabel('')
+      return
+    }
+
+    const controller = new AbortController()
+    setMarketQueryLabel(label)
+    setMarketStatus('loading')
+
+    fetch(url, {
+      signal: controller.signal
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Request failed with status ${response.status}`)
+        }
+        return response.json() as Promise<{ snapshot: MarketSnapshot }>
+      })
+      .then((payload) => {
+        setMarketSnapshot(payload.snapshot)
+        setMarketStatus('ready')
+      })
+      .catch((error) => {
+        if (error.name === 'AbortError') return
+        console.warn('Unable to load Redfin market snapshot', error)
+        setMarketSnapshot(null)
+        setMarketStatus('error')
+      })
+
+    return () => controller.abort()
+  }, [state, city, zip])
 
   const { properties, summary } = useMemo(
     () =>
@@ -87,6 +169,7 @@ export function EquityOpportunityDashboard() {
           />
           <div className="space-y-6">
             <SummaryRow summary={summary} />
+            <MarketSnapshotPanel snapshot={marketSnapshot} status={marketStatus} queryLabel={marketQueryLabel} />
             {properties.length ? (
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {properties.map((property) => (
@@ -278,6 +361,87 @@ function SummaryCard({ label, value, accent }: { label: string; value: string; a
       </p>
     </div>
   )
+}
+
+function MarketSnapshotPanel({
+  snapshot,
+  status,
+  queryLabel
+}: {
+  snapshot: MarketSnapshot | null
+  status: 'idle' | 'loading' | 'ready' | 'error'
+  queryLabel: string
+}) {
+  if (status === 'idle') {
+    return (
+      <div className="rounded-3xl border border-brand-navy/10 bg-surface-subtle px-6 py-5 text-sm text-brand-navy/60">
+        Enter a state, city, or ZIP to surface live market stats from Redfin.
+      </div>
+    )
+  }
+
+  if (status === 'loading') {
+    return (
+      <div className="rounded-3xl border border-brand-navy/10 bg-surface-subtle px-6 py-5 text-sm text-brand-navy/60">
+        Loading market telemetry...
+      </div>
+    )
+  }
+
+  if (status === 'error') {
+    return (
+      <div className="rounded-3xl border border-brand-orange/10 bg-brand-orange/5 px-6 py-5 text-sm text-brand-orange">
+        We couldn&apos;t load the latest Redfin market data for {queryLabel || 'your selection'}. Please try again later.
+      </div>
+    )
+  }
+
+  if (!snapshot) {
+    return null
+  }
+
+  const marketLabel =
+    snapshot.regionType === 'zip' && snapshot.zip
+      ? `ZIP ${snapshot.zip}`
+      : snapshot.regionType === 'city' && snapshot.city
+        ? `${snapshot.city}, ${snapshot.stateCode}`
+        : `${snapshot.state} (${snapshot.stateCode})`
+
+  return (
+    <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <SnapshotCard label="Market" value={marketLabel} />
+      <SnapshotCard label="Median Sale Price" value={formatCurrencyValue(snapshot.medianSalePrice)} />
+      <SnapshotCard label="Median DOM" value={formatNumberValue(snapshot.medianDom, ' days')} />
+      <SnapshotCard label="Inventory" value={formatNumberValue(snapshot.inventory)} />
+      <SnapshotCard label="Months of Supply" value={formatNumberValue(snapshot.monthsOfSupply)} />
+      <SnapshotCard label="Sold Above List" value={formatPercentValue(snapshot.soldAboveList)} />
+      <SnapshotCard label="New Listings" value={formatNumberValue(snapshot.newListings)} />
+      <SnapshotCard label="Pending Sales" value={formatNumberValue(snapshot.pendingSales)} />
+      <SnapshotCard label="Avg Sale-to-List" value={formatPercentValue(snapshot.avgSaleToList)} />
+      <SnapshotCard label="Price Drops" value={formatPercentValue(snapshot.priceDrops)} />
+    </div>
+  )
+}
+
+function SnapshotCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-3xl border border-brand-navy/10 bg-white px-5 py-4 shadow-card">
+      <p className="text-xs font-semibold uppercase tracking-wide text-brand-navy/50">{label}</p>
+      <p className="mt-2 text-lg font-semibold text-brand-navy">{value}</p>
+    </div>
+  )
+}
+
+function formatCurrencyValue(value: number | null) {
+  return value == null ? '—' : currencyFormatter.format(value)
+}
+
+function formatNumberValue(value: number | null, suffix = '') {
+  return value == null ? '—' : `${formatNumber(value)}${suffix}`
+}
+
+function formatPercentValue(value: number | null) {
+  return value == null ? '—' : percentOfOneFormatter.format(value)
 }
 
 function PropertyCard({ property }: { property: PropertyOpportunity }) {
