@@ -4,7 +4,6 @@ import { getStateCensusData, getCountyCensusData, getZipCensusData } from '@/lib
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const zip = searchParams.get('zip')
-  const city = searchParams.get('city')
   const state = searchParams.get('state')
   const county = searchParams.get('county')
 

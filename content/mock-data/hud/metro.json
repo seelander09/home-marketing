@@ -1,0 +1,104 @@
+[
+  {
+    "regionType": "metro",
+    "regionCode": "31080",
+    "regionName": "Los Angeles-Long Beach-Anaheim, CA",
+    "state": "California",
+    "stateCode": "CA",
+    "housingPriceIndex": {
+      "current": 338.9,
+      "yearOverYearChange": 4.6,
+      "quarterlyChange": 1.2,
+      "historicalData": []
+    },
+    "marketConditions": {
+      "affordabilityIndex": 84.1,
+      "inventoryLevel": "low",
+      "marketVelocity": 83.0,
+      "priceAppreciation": 5.7
+    },
+    "economicIndicators": {
+      "medianIncome": 84500,
+      "unemploymentRate": 4.8,
+      "populationGrowth": 0.5,
+      "jobGrowth": 2.2
+    },
+    "affordability": {
+      "medianHomePrice": 812000,
+      "medianRent": 2820,
+      "incomeToPriceRatio": 6.5,
+      "rentToIncomeRatio": 0.35,
+      "affordableHousingUnits": 71200,
+      "costBurdenedHouseholds": 32.7
+    },
+    "lastUpdated": "2025-06-30T00:00:00.000Z"
+  },
+  {
+    "regionType": "metro",
+    "regionCode": "26420",
+    "regionName": "Houston-The Woodlands-Sugar Land, TX",
+    "state": "Texas",
+    "stateCode": "TX",
+    "housingPriceIndex": {
+      "current": 248.6,
+      "yearOverYearChange": 3.2,
+      "quarterlyChange": 0.9,
+      "historicalData": []
+    },
+    "marketConditions": {
+      "affordabilityIndex": 100.5,
+      "inventoryLevel": "moderate",
+      "marketVelocity": 71.0,
+      "priceAppreciation": 3.8
+    },
+    "economicIndicators": {
+      "medianIncome": 70500,
+      "unemploymentRate": 4.2,
+      "populationGrowth": 1.7,
+      "jobGrowth": 3.3
+    },
+    "affordability": {
+      "medianHomePrice": 340000,
+      "medianRent": 1600,
+      "incomeToPriceRatio": 4.6,
+      "rentToIncomeRatio": 0.27,
+      "affordableHousingUnits": 48200,
+      "costBurdenedHouseholds": 25.8
+    },
+    "lastUpdated": "2025-06-30T00:00:00.000Z"
+  },
+  {
+    "regionType": "metro",
+    "regionCode": "33100",
+    "regionName": "Miami-Fort Lauderdale-Pompano Beach, FL",
+    "state": "Florida",
+    "stateCode": "FL",
+    "housingPriceIndex": {
+      "current": 298.3,
+      "yearOverYearChange": 4.7,
+      "quarterlyChange": 1.4,
+      "historicalData": []
+    },
+    "marketConditions": {
+      "affordabilityIndex": 89.6,
+      "inventoryLevel": "low",
+      "marketVelocity": 78.0,
+      "priceAppreciation": 6.2
+    },
+    "economicIndicators": {
+      "medianIncome": 61800,
+      "unemploymentRate": 3.7,
+      "populationGrowth": 2.2,
+      "jobGrowth": 3.0
+    },
+    "affordability": {
+      "medianHomePrice": 448000,
+      "medianRent": 1990,
+      "incomeToPriceRatio": 5.8,
+      "rentToIncomeRatio": 0.33,
+      "affordableHousingUnits": 38900,
+      "costBurdenedHouseholds": 30.8
+    },
+    "lastUpdated": "2025-06-30T00:00:00.000Z"
+  }
+]

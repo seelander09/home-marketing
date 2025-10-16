@@ -1,0 +1,104 @@
+[
+  {
+    "regionType": "state",
+    "regionCode": "CA",
+    "regionName": "California",
+    "state": "California",
+    "stateCode": "CA",
+    "housingPriceIndex": {
+      "current": 325.4,
+      "yearOverYearChange": 4.2,
+      "quarterlyChange": 1.1,
+      "historicalData": []
+    },
+    "marketConditions": {
+      "affordabilityIndex": 86.5,
+      "inventoryLevel": "low",
+      "marketVelocity": 82.0,
+      "priceAppreciation": 5.4
+    },
+    "economicIndicators": {
+      "medianIncome": 91500,
+      "unemploymentRate": 4.7,
+      "populationGrowth": 0.9,
+      "jobGrowth": 2.3
+    },
+    "affordability": {
+      "medianHomePrice": 765000,
+      "medianRent": 2650,
+      "incomeToPriceRatio": 6.5,
+      "rentToIncomeRatio": 0.35,
+      "affordableHousingUnits": 128500,
+      "costBurdenedHouseholds": 31.2
+    },
+    "lastUpdated": "2025-06-30T00:00:00.000Z"
+  },
+  {
+    "regionType": "state",
+    "regionCode": "TX",
+    "regionName": "Texas",
+    "state": "Texas",
+    "stateCode": "TX",
+    "housingPriceIndex": {
+      "current": 268.8,
+      "yearOverYearChange": 3.1,
+      "quarterlyChange": 0.9,
+      "historicalData": []
+    },
+    "marketConditions": {
+      "affordabilityIndex": 97.2,
+      "inventoryLevel": "moderate",
+      "marketVelocity": 74.0,
+      "priceAppreciation": 4.1
+    },
+    "economicIndicators": {
+      "medianIncome": 72000,
+      "unemploymentRate": 4.1,
+      "populationGrowth": 1.8,
+      "jobGrowth": 3.0
+    },
+    "affordability": {
+      "medianHomePrice": 345000,
+      "medianRent": 1625,
+      "incomeToPriceRatio": 4.7,
+      "rentToIncomeRatio": 0.27,
+      "affordableHousingUnits": 212400,
+      "costBurdenedHouseholds": 25.4
+    },
+    "lastUpdated": "2025-06-30T00:00:00.000Z"
+  },
+  {
+    "regionType": "state",
+    "regionCode": "FL",
+    "regionName": "Florida",
+    "state": "Florida",
+    "stateCode": "FL",
+    "housingPriceIndex": {
+      "current": 291.6,
+      "yearOverYearChange": 4.8,
+      "quarterlyChange": 1.5,
+      "historicalData": []
+    },
+    "marketConditions": {
+      "affordabilityIndex": 91.4,
+      "inventoryLevel": "low",
+      "marketVelocity": 79.0,
+      "priceAppreciation": 6.1
+    },
+    "economicIndicators": {
+      "medianIncome": 63500,
+      "unemploymentRate": 3.8,
+      "populationGrowth": 2.1,
+      "jobGrowth": 2.9
+    },
+    "affordability": {
+      "medianHomePrice": 405000,
+      "medianRent": 1885,
+      "incomeToPriceRatio": 5.5,
+      "rentToIncomeRatio": 0.31,
+      "affordableHousingUnits": 145800,
+      "costBurdenedHouseholds": 29.6
+    },
+    "lastUpdated": "2025-06-30T00:00:00.000Z"
+  }
+]

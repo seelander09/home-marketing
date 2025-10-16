@@ -1,8 +1,13 @@
 "use client"
 
-import { TerritoryMapClient } from '@/components/sections/TerritoryMap.client'
+import dynamic from 'next/dynamic'
 import { SmartLink } from '@/components/ui/SmartLink'
 import type { TerritoryMapConfig } from '@/lib/cms/types'
+
+const TerritoryMapClient = dynamic(
+  () => import('@/components/sections/TerritoryMap.client'),
+  { ssr: false }
+)
 
 export function TerritoryMap({ config }: { config: TerritoryMapConfig }) {
   return (

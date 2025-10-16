@@ -29,15 +29,19 @@
                            "label":  "Contact",
                            "href":  "/contact"
                        },
-                       {
-                           "href":  "/analytics/dashboard",
-                           "label":  "Analytics"
-                       },
-                       {
-                           "href":  "/compliance/resources",
-                           "label":  "Compliance"
-                       }
-                   ],
+        {
+            "href":  "/analytics/dashboard",
+            "label":  "Analytics"
+        },
+        {
+            "href":  "/analytics/seller-radar",
+            "label":  "Seller Radar"
+        },
+        {
+            "href":  "/compliance/resources",
+            "label":  "Compliance"
+        }
+    ],
     "primaryCta":  {
                        "label":  "Request a Demo",
                        "href":  "/contact#demo",

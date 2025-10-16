@@ -1,7 +1,7 @@
 import { RedfinMarketSnapshot, getStateMarketSnapshot, getCityMarketSnapshot, getZipMarketSnapshot } from './redfin'
 import { CensusHousingData, getStateCensusData, getCountyCensusData, getZipCensusData } from './census'
 import { HUDMarketData, getStateHUDData, getCountyHUDData, getMetroHUDData } from './hud'
-import { FREDEconomicData, getFREDEconomicData, getStateEconomicData } from './fred'
+import { FREDEconomicData, getFREDEconomicData } from './fred'
 
 export type ComprehensiveMarketData = {
   // Core identification

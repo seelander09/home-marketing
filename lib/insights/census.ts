@@ -1,4 +1,4 @@
-import fs from 'fs/promises'
+﻿import fs from 'fs/promises'
 import path from 'path'
 
 export type CensusDemographics = {
@@ -48,7 +48,7 @@ const CENSUS_API_BASE = 'https://api.census.gov/data'
 const CACHE_DIR = path.resolve(process.cwd(), '..', 'census-data', 'cache')
 
 // ACS 5-Year Estimates Variables
-const ACS_VARIABLES = {
+const ACS_VARIABLES: Record<string, string> = {
   // Housing variables
   B25001_001E: 'totalHousingUnits',
   B25003_001E: 'totalOccupiedUnits',
@@ -58,12 +58,16 @@ const ACS_VARIABLES = {
   B25064_001E: 'medianRent',
   B25063_001E: 'medianGrossRent',
   B25034_001E: 'totalUnitsByYearBuilt',
-  B25034_010E: 'unitsBuiltBefore1980',
-  B25034_011E: 'unitsBuilt1980to1989',
-  B25034_012E: 'unitsBuilt1990to1999',
-  B25034_013E: 'unitsBuilt2000to2009',
-  B25034_014E: 'unitsBuilt2010to2019',
-  B25034_015E: 'unitsBuiltAfter2020',
+  B25034_002E: 'unitsBuilt2020OrLater',
+  B25034_003E: 'unitsBuilt2010to2019',
+  B25034_004E: 'unitsBuilt2000to2009',
+  B25034_005E: 'unitsBuilt1990to1999',
+  B25034_006E: 'unitsBuilt1980to1989',
+  B25034_007E: 'unitsBuilt1970to1979',
+  B25034_008E: 'unitsBuilt1960to1969',
+  B25034_009E: 'unitsBuilt1950to1959',
+  B25034_010E: 'unitsBuilt1940to1949',
+  B25034_011E: 'unitsBuiltBefore1940',
   B25035_001E: 'medianYearBuilt',
   
   // Demographic variables
@@ -177,15 +181,21 @@ function buildCensusSnapshot(row: Record<string, string>, regionType: CacheKind)
     ownerOccupiedRate: calculateRates(ownerOccupied, occupiedUnits),
     renterOccupiedRate: calculateRates(renterOccupied, occupiedUnits),
     housingUnitsBuilt: {
-      before1980: parseNumber(row.B25034_010E),
+      before1980: (() => {
+        const sixties = parseNumber(row.B25034_008E) || 0
+        const fifties = parseNumber(row.B25034_009E) || 0
+        const forties = parseNumber(row.B25034_010E) || 0
+        const earlier = parseNumber(row.B25034_011E) || 0
+        return sixties + fifties + forties + earlier
+      })(),
       between1980and1999: (() => {
-        const eighties = parseNumber(row.B25034_011E) || 0
-        const nineties = parseNumber(row.B25034_012E) || 0
+        const eighties = parseNumber(row.B25034_006E) || 0
+        const nineties = parseNumber(row.B25034_005E) || 0
         return eighties + nineties
       })(),
-      between2000and2009: parseNumber(row.B25034_013E),
-      between2010and2019: parseNumber(row.B25034_014E),
-      after2020: parseNumber(row.B25034_015E)
+      between2000and2009: parseNumber(row.B25034_004E),
+      between2010and2019: parseNumber(row.B25034_003E),
+      after2020: parseNumber(row.B25034_002E)
     },
     medianYearBuilt: parseNumber(row.B25035_001E),
     lastUpdated: new Date().toISOString(),
@@ -234,18 +244,18 @@ async function fetchCensusData(regionType: CacheKind): Promise<CensusCache> {
       throw new Error('Invalid Census API response format')
     }
 
-    const headers = data[0]
-    const rows = data.slice(1)
+    const headers = data[0] as string[]
+    const rows = data.slice(1) as string[][]
     
     const cache: CensusCache = {}
     
     for (const row of rows) {
       if (!row || row.length !== headers.length) continue
       
-      const rowData = headers.reduce((acc, header, index) => {
-        acc[header] = row[index]
+      const rowData = headers.reduce<Record<string, string>>((acc, header, index) => {
+        acc[header] = row[index] ?? ''
         return acc
-      }, {} as Record<string, string>)
+      }, {})
       
       const snapshot = buildCensusSnapshot(rowData, regionType)
       const key = getCacheKey(regionType, rowData)
@@ -260,6 +270,15 @@ async function fetchCensusData(regionType: CacheKind): Promise<CensusCache> {
     
   } catch (error) {
     console.error(`Failed to fetch Census ${regionType} data:`, error)
+    try {
+      const cached = await loadCache(regionType)
+      if (Object.keys(cached).length > 0) {
+        console.warn(`Using cached Census ${regionType} data due to fetch error`)
+        return cached
+      }
+    } catch (cacheError) {
+      console.error(`Unable to read cached Census ${regionType} data`, cacheError)
+    }
     return {}
   }
 }
@@ -333,7 +352,7 @@ export async function getZipCensusData(zip: string): Promise<CensusHousingData |
 }
 
 export async function buildCensusCache(): Promise<void> {
-  console.log('🏗  Building Census ACS cache...')
+  console.log('Building Census ACS cache...')
   await ensureCacheDir()
 
   const [stateData, countyData, placeData, zipData] = await Promise.all([
@@ -354,11 +373,11 @@ export async function buildCensusCache(): Promise<void> {
     outputs.map(async ([filename, payload]) => {
       const target = path.join(CACHE_DIR, filename)
       await fs.writeFile(target, JSON.stringify(payload, null, 2))
-      console.log(`💾 Wrote ${Object.keys(payload).length.toLocaleString()} records to ${target}`)
+      console.log(`Wrote ${Object.keys(payload).length.toLocaleString()} records to ${target}`)
     })
   )
 
-  console.log('✅ Census cache build complete')
+  console.log('Census cache build complete')
 }
 
 export async function hasCensusCache(kind: CacheKind): Promise<boolean> {
@@ -370,3 +389,5 @@ export async function hasCensusCache(kind: CacheKind): Promise<boolean> {
     return false
   }
 }
+
+

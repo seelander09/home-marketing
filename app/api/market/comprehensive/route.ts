@@ -1,6 +1,32 @@
 import { NextResponse } from 'next/server'
 import { getComprehensiveMarketData, MarketDataRequest } from '@/lib/insights/unified'
 
+type LocationPayload = Partial<Record<'zip' | 'city' | 'state' | 'county' | 'metro', string>>
+
+function parseLocationPayload(value: unknown): LocationPayload | null {
+  if (!value || typeof value !== 'object') {
+    return null
+  }
+
+  const candidate = value as Record<string, unknown>
+  const keys: Array<keyof LocationPayload> = ['zip', 'city', 'state', 'county', 'metro']
+  const parsed: LocationPayload = {}
+  let hasValue = false
+
+  for (const key of keys) {
+    const raw = candidate[key]
+    if (typeof raw === 'string') {
+      const trimmed = raw.trim()
+      if (trimmed) {
+        parsed[key] = trimmed
+        hasValue = true
+      }
+    }
+  }
+
+  return hasValue ? parsed : null
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   
@@ -96,9 +122,11 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { locations, includeInsights = true } = body
-    
-    if (!Array.isArray(locations) || locations.length === 0) {
+    const includeInsights =
+      typeof body?.includeInsights === 'boolean' ? body.includeInsights : true
+    const locationsInput = body?.locations
+
+    if (!Array.isArray(locationsInput) || locationsInput.length === 0) {
       return NextResponse.json(
         { error: 'Provide an array of locations to query' },
         { status: 400 }
@@ -106,15 +134,28 @@ export async function POST(request: Request) {
     }
     
     // Limit batch size to prevent timeouts
-    if (locations.length > 50) {
+    if (locationsInput.length > 50) {
       return NextResponse.json(
         { error: 'Maximum 50 locations per batch request' },
         { status: 400 }
       )
     }
-    
+
+    const parsedLocations: LocationPayload[] = []
+
+    for (const location of locationsInput) {
+      const parsed = parseLocationPayload(location)
+      if (!parsed) {
+        return NextResponse.json(
+          { error: 'Each location must contain at least one location field (zip, city, state, county, or metro)' },
+          { status: 400 }
+        )
+      }
+      parsedLocations.push(parsed)
+    }
+
     const results = await Promise.all(
-      locations.map(async (location: any) => {
+      parsedLocations.map(async (location) => {
         const marketDataRequest: MarketDataRequest = {
           zip: location.zip,
           city: location.city,
@@ -144,11 +185,11 @@ export async function POST(request: Request) {
     
     const successful = results.filter(r => r.success).length
     const failed = results.filter(r => !r.success).length
-    
+
     return NextResponse.json({
       results,
       summary: {
-        total: locations.length,
+        total: parsedLocations.length,
         successful,
         failed,
         timestamp: new Date().toISOString()
