@@ -1,0 +1,98 @@
+[
+  {
+    "propertyId": "austin-elm-001",
+    "listingId": "austin-elm-001-2024",
+    "listedDate": "2024-09-18",
+    "status": "withdrawn",
+    "listPrice": 1089000,
+    "daysOnMarket": 32
+  },
+  {
+    "propertyId": "sf-oak-002",
+    "listingId": "sf-oak-002-2023",
+    "listedDate": "2023-05-10",
+    "status": "sold",
+    "listPrice": 1445000,
+    "daysOnMarket": 21
+  },
+  {
+    "propertyId": "denver-birch-003",
+    "listingId": "denver-birch-003-2022",
+    "listedDate": "2022-03-06",
+    "status": "expired",
+    "listPrice": 689000,
+    "daysOnMarket": 45
+  },
+  {
+    "propertyId": "chicago-maple-004",
+    "listingId": "chicago-maple-004-2021",
+    "listedDate": "2021-10-01",
+    "status": "withdrawn",
+    "listPrice": 615000,
+    "daysOnMarket": 58
+  },
+  {
+    "propertyId": "phoenix-cactus-005",
+    "listingId": "phoenix-cactus-005-2024",
+    "listedDate": "2024-02-12",
+    "status": "active",
+    "listPrice": 565000,
+    "daysOnMarket": 37
+  },
+  {
+    "propertyId": "atlanta-peachtree-006",
+    "listingId": "atlanta-peachtree-006-2022",
+    "listedDate": "2022-11-04",
+    "status": "sold",
+    "listPrice": 479000,
+    "daysOnMarket": 26
+  },
+  {
+    "propertyId": "seattle-cedar-007",
+    "listingId": "seattle-cedar-007-2025",
+    "listedDate": "2025-07-22",
+    "status": "coming-soon",
+    "listPrice": 1045000,
+    "daysOnMarket": null
+  },
+  {
+    "propertyId": "portland-fir-008",
+    "listingId": "portland-fir-008-2023",
+    "listedDate": "2023-08-19",
+    "status": "withdrawn",
+    "listPrice": 639000,
+    "daysOnMarket": 41
+  },
+  {
+    "propertyId": "miami-bay-009",
+    "listingId": "miami-bay-009-2023",
+    "listedDate": "2023-03-29",
+    "status": "sold",
+    "listPrice": 859000,
+    "daysOnMarket": 28
+  },
+  {
+    "propertyId": "dallas-lake-010",
+    "listingId": "dallas-lake-010-2024",
+    "listedDate": "2024-01-07",
+    "status": "pending",
+    "listPrice": 602000,
+    "daysOnMarket": 17
+  },
+  {
+    "propertyId": "charlotte-oak-011",
+    "listingId": "charlotte-oak-011-2023",
+    "listedDate": "2023-06-24",
+    "status": "expired",
+    "listPrice": 498000,
+    "daysOnMarket": 63
+  },
+  {
+    "propertyId": "boston-harbor-012",
+    "listingId": "boston-harbor-012-2024",
+    "listedDate": "2024-05-18",
+    "status": "withdrawn",
+    "listPrice": 1099000,
+    "daysOnMarket": 49
+  }
+]

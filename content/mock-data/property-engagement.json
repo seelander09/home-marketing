@@ -1,0 +1,126 @@
+[
+  {
+    "propertyId": "austin-elm-001",
+    "channel": "email",
+    "event": "open",
+    "occurredAt": "2025-09-10T14:12:00Z",
+    "campaign": "equity-update"
+  },
+  {
+    "propertyId": "austin-elm-001",
+    "channel": "email",
+    "event": "click",
+    "occurredAt": "2025-09-10T14:15:00Z",
+    "campaign": "equity-update"
+  },
+  {
+    "propertyId": "austin-elm-001",
+    "channel": "web",
+    "event": "valuation-check",
+    "occurredAt": "2025-09-10T14:27:00Z",
+    "metadata": {
+      "estimatedValue": 1085000
+    }
+  },
+  {
+    "propertyId": "sf-oak-002",
+    "channel": "email",
+    "event": "open",
+    "occurredAt": "2025-09-08T16:40:00Z",
+    "campaign": "market-hotlist"
+  },
+  {
+    "propertyId": "sf-oak-002",
+    "channel": "web",
+    "event": "seller-guide-download",
+    "occurredAt": "2025-09-08T16:52:00Z"
+  },
+  {
+    "propertyId": "denver-birch-003",
+    "channel": "sms",
+    "event": "link-click",
+    "occurredAt": "2025-09-04T19:03:00Z"
+  },
+  {
+    "propertyId": "phoenix-cactus-005",
+    "channel": "email",
+    "event": "open",
+    "occurredAt": "2025-09-12T09:20:00Z",
+    "campaign": "investment-roundup"
+  },
+  {
+    "propertyId": "phoenix-cactus-005",
+    "channel": "email",
+    "event": "click",
+    "occurredAt": "2025-09-12T09:22:00Z",
+    "campaign": "investment-roundup"
+  },
+  {
+    "propertyId": "atlanta-peachtree-006",
+    "channel": "web",
+    "event": "valuation-check",
+    "occurredAt": "2025-08-25T18:05:00Z",
+    "metadata": {
+      "estimatedValue": 495000
+    }
+  },
+  {
+    "propertyId": "seattle-cedar-007",
+    "channel": "email",
+    "event": "open",
+    "occurredAt": "2025-09-14T13:10:00Z",
+    "campaign": "inventory-report"
+  },
+  {
+    "propertyId": "seattle-cedar-007",
+    "channel": "email",
+    "event": "click",
+    "occurredAt": "2025-09-14T13:11:00Z",
+    "campaign": "inventory-report"
+  },
+  {
+    "propertyId": "seattle-cedar-007",
+    "channel": "web",
+    "event": "seller-guide-download",
+    "occurredAt": "2025-09-14T13:15:00Z"
+  },
+  {
+    "propertyId": "miami-bay-009",
+    "channel": "call",
+    "event": "conversation",
+    "occurredAt": "2025-09-11T21:30:00Z",
+    "metadata": {
+      "durationSeconds": 480
+    }
+  },
+  {
+    "propertyId": "dallas-lake-010",
+    "channel": "email",
+    "event": "open",
+    "occurredAt": "2025-09-07T10:05:00Z",
+    "campaign": "equity-update"
+  },
+  {
+    "propertyId": "dallas-lake-010",
+    "channel": "email",
+    "event": "click",
+    "occurredAt": "2025-09-07T10:08:00Z",
+    "campaign": "equity-update"
+  },
+  {
+    "propertyId": "charlotte-oak-011",
+    "channel": "email",
+    "event": "bounce",
+    "occurredAt": "2025-09-03T08:11:00Z",
+    "campaign": "lifestyle-report"
+  },
+  {
+    "propertyId": "boston-harbor-012",
+    "channel": "web",
+    "event": "valuation-check",
+    "occurredAt": "2025-09-09T15:24:00Z",
+    "metadata": {
+      "estimatedValue": 1090000
+    }
+  }
+]

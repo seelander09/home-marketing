@@ -1,0 +1,130 @@
+[
+  {
+    "propertyId": "austin-elm-001",
+    "eventType": "sale",
+    "closedDate": "2019-05-14",
+    "price": 755000,
+    "loanBalance": 472000,
+    "occupancyType": "primary"
+  },
+  {
+    "propertyId": "austin-elm-001",
+    "eventType": "refinance",
+    "closedDate": "2022-08-01",
+    "price": 800000,
+    "loanBalance": 460000,
+    "occupancyType": "primary"
+  },
+  {
+    "propertyId": "sf-oak-002",
+    "eventType": "sale",
+    "closedDate": "2017-03-22",
+    "price": 1125000,
+    "loanBalance": 680000,
+    "occupancyType": "primary"
+  },
+  {
+    "propertyId": "sf-oak-002",
+    "eventType": "refinance",
+    "closedDate": "2023-02-19",
+    "price": 1350000,
+    "loanBalance": 640000,
+    "occupancyType": "primary"
+  },
+  {
+    "propertyId": "denver-birch-003",
+    "eventType": "sale",
+    "closedDate": "2020-11-02",
+    "price": 625000,
+    "loanBalance": 410000,
+    "occupancyType": "primary"
+  },
+  {
+    "propertyId": "chicago-maple-004",
+    "eventType": "sale",
+    "closedDate": "2015-07-11",
+    "price": 540000,
+    "loanBalance": 360000,
+    "occupancyType": "primary"
+  },
+  {
+    "propertyId": "phoenix-cactus-005",
+    "eventType": "sale",
+    "closedDate": "2021-02-24",
+    "price": 480000,
+    "loanBalance": 320000,
+    "occupancyType": "investment"
+  },
+  {
+    "propertyId": "phoenix-cactus-005",
+    "eventType": "refinance",
+    "closedDate": "2024-01-16",
+    "price": 525000,
+    "loanBalance": 315000,
+    "occupancyType": "investment"
+  },
+  {
+    "propertyId": "atlanta-peachtree-006",
+    "eventType": "sale",
+    "closedDate": "2018-04-29",
+    "price": 415000,
+    "loanBalance": 270000,
+    "occupancyType": "primary"
+  },
+  {
+    "propertyId": "seattle-cedar-007",
+    "eventType": "sale",
+    "closedDate": "2022-06-18",
+    "price": 920000,
+    "loanBalance": 620000,
+    "occupancyType": "primary"
+  },
+  {
+    "propertyId": "seattle-cedar-007",
+    "eventType": "refinance",
+    "closedDate": "2024-05-12",
+    "price": 980000,
+    "loanBalance": 600000,
+    "occupancyType": "primary"
+  },
+  {
+    "propertyId": "portland-fir-008",
+    "eventType": "sale",
+    "closedDate": "2016-09-08",
+    "price": 545000,
+    "loanBalance": 350000,
+    "occupancyType": "primary"
+  },
+  {
+    "propertyId": "miami-bay-009",
+    "eventType": "sale",
+    "closedDate": "2020-02-03",
+    "price": 735000,
+    "loanBalance": 510000,
+    "occupancyType": "primary"
+  },
+  {
+    "propertyId": "dallas-lake-010",
+    "eventType": "sale",
+    "closedDate": "2021-11-19",
+    "price": 552000,
+    "loanBalance": 360000,
+    "occupancyType": "primary"
+  },
+  {
+    "propertyId": "charlotte-oak-011",
+    "eventType": "sale",
+    "closedDate": "2019-08-25",
+    "price": 438000,
+    "loanBalance": 290000,
+    "occupancyType": "primary"
+  },
+  {
+    "propertyId": "boston-harbor-012",
+    "eventType": "sale",
+    "closedDate": "2014-10-30",
+    "price": 985000,
+    "loanBalance": 680000,
+    "occupancyType": "primary"
+  }
+]

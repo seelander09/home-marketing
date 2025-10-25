@@ -1,5 +1,11 @@
 import data from '@/content/mock-data/realie-properties.json'
+import { getSellerFeatureRecord } from '@/lib/features/seller/store'
 import { getZipGeography } from '@/lib/geography/zip-crosswalk'
+import type {
+  EngagementSummary,
+  ListingSummary,
+  TransactionSummary
+} from '@/lib/data-pipeline/types'
 import {
   buildSellerFeatureVector,
   buildSellerSignals,
@@ -50,14 +56,29 @@ export type PropertyOpportunity = {
   sellerLabel?: SellerOutcomeLabel
   sellerSignals?: SellerSignals
   sellerFeatures?: SellerFeatureVector
+  transactionSummary?: TransactionSummary
+  listingActivity?: ListingSummary
+  engagementActivity?: EngagementSummary
+  featureCompleteness?: number
+  featureSources?: string[]
 }
 
 const propertiesDataset: PropertyOpportunity[] = (data as PropertyOpportunity[]).map((property) => {
+  const featureRecord = getSellerFeatureRecord(property.id)
+  const transactionSummary: TransactionSummary | undefined = featureRecord?.transactionSummary
+  const listingSummary: ListingSummary | undefined = featureRecord?.listingSummary
+  const engagementSummary: EngagementSummary | undefined = featureRecord?.engagementSummary
+
   const geography = getZipGeography(property.zip)
   const ownerAge =
     typeof property.ownerBirthYear === 'number'
       ? new Date().getFullYear() - property.ownerBirthYear
       : null
+
+  const derivedYearsInHome =
+    Number.isFinite(property.yearsInHome) && property.yearsInHome > 0
+      ? property.yearsInHome
+      : Math.round(transactionSummary?.ownershipDurationYears ?? 0)
 
   const sellerLabel: SellerOutcomeLabel | undefined =
     property.sellerOutcome === 1
@@ -66,38 +87,72 @@ const propertiesDataset: PropertyOpportunity[] = (data as PropertyOpportunity[])
         ? 'retained'
         : undefined
 
+  const digitalEngagementScore =
+    property.digitalEngagementScore ?? engagementSummary?.multiChannelScore ?? null
+
+  const neighborsListed12Months =
+    property.neighborsListed12Months !== undefined && property.neighborsListed12Months !== null
+      ? property.neighborsListed12Months
+      : listingSummary?.listingsPast12Months ?? null
+
   const sellerSignals = buildSellerSignals({
     marketValue: property.marketValue,
     estimatedEquity: property.estimatedEquity,
     loanBalance: property.loanBalance,
-    yearsInHome: property.yearsInHome,
+    yearsInHome: derivedYearsInHome,
     householdIncomeBand: property.householdIncomeBand,
     monthlyMortgagePayment: property.monthlyMortgagePayment,
-    digitalEngagementScore: property.digitalEngagementScore,
-    neighborsListed12Months: property.neighborsListed12Months,
-    lifeEventSignals: property.lifeEventSignals
+    digitalEngagementScore,
+    neighborsListed12Months,
+    lifeEventSignals: property.lifeEventSignals,
+    recentListingCount: listingSummary?.listingsPast12Months,
+    averageDaysOnMarket: listingSummary?.averageDaysOnMarket ?? null,
+    transactionRecencyMonths: transactionSummary?.transactionRecencyMonths ?? null,
+    refinanceCount36m: transactionSummary?.refinanceCount36m ?? 0,
+    highIntentEngagement30d: engagementSummary?.highIntentEvents30Days ?? 0,
+    engagementMultiChannelScore:
+      engagementSummary?.multiChannelScore ?? digitalEngagementScore ?? null,
+    eventsLast90Days: engagementSummary?.eventsLast90Days ?? null,
+    ownershipDurationYears: transactionSummary?.ownershipDurationYears ?? derivedYearsInHome
   })
 
   const sellerFeatures = buildSellerFeatureVector({
     marketValue: property.marketValue,
     estimatedEquity: property.estimatedEquity,
     loanBalance: property.loanBalance,
-    yearsInHome: property.yearsInHome,
+    yearsInHome: derivedYearsInHome,
     householdIncomeBand: property.householdIncomeBand,
     monthlyMortgagePayment: property.monthlyMortgagePayment,
-    digitalEngagementScore: property.digitalEngagementScore,
-    neighborsListed12Months: property.neighborsListed12Months,
+    digitalEngagementScore,
+    neighborsListed12Months,
     lifeEventSignals: property.lifeEventSignals,
     listingScore: property.listingScore,
     equityUpside: property.equityUpside,
     ownerAge,
     sellerOutcome: property.sellerOutcome,
-    sellerSignals
+    sellerSignals,
+    recentListingCount: listingSummary?.listingsPast12Months,
+    averageDaysOnMarket: listingSummary?.averageDaysOnMarket ?? null,
+    transactionRecencyMonths: transactionSummary?.transactionRecencyMonths ?? null,
+    refinanceCount36m: transactionSummary?.refinanceCount36m ?? 0,
+    highIntentEngagement30d: engagementSummary?.highIntentEvents30Days ?? 0,
+    engagementMultiChannelScore:
+      engagementSummary?.multiChannelScore ?? digitalEngagementScore ?? null,
+    eventsLast90Days: engagementSummary?.eventsLast90Days ?? null,
+    ownershipDurationYears: transactionSummary?.ownershipDurationYears ?? derivedYearsInHome
   })
+
+  const lastSaleDate = property.lastSaleDate ?? transactionSummary?.lastSaleDate
+  const lastListingDate = property.lastListingDate ?? listingSummary?.lastListedDate
 
   return {
     ...property,
     ownerAge,
+    yearsInHome: derivedYearsInHome,
+    digitalEngagementScore: digitalEngagementScore ?? null,
+    neighborsListed12Months,
+    lastSaleDate,
+    lastListingDate,
     county: property.county ?? geography?.county,
     neighborhood: property.neighborhood ?? geography?.neighborhoods?.[0],
     countyFips: property.countyFips ?? geography?.countyFips,
@@ -106,7 +161,12 @@ const propertiesDataset: PropertyOpportunity[] = (data as PropertyOpportunity[])
     longitude: property.longitude ?? geography?.longitude,
     sellerLabel,
     sellerSignals,
-    sellerFeatures
+    sellerFeatures,
+    transactionSummary: transactionSummary ?? undefined,
+    listingActivity: listingSummary ?? undefined,
+    engagementActivity: engagementSummary ?? undefined,
+    featureCompleteness: featureRecord?.quality.completeness ?? undefined,
+    featureSources: featureRecord?.quality.sources ?? undefined
   }
 })
 

@@ -57,19 +57,27 @@ export function SellerRadarDashboard() {
   const [analysis, setAnalysis] = useState<SellerPropensityAnalysis | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [expandedPropertyId, setExpandedPropertyId] = useState<string | null>(null)
+  const [pushStatus, setPushStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle')
+  const [pushMessage, setPushMessage] = useState<string | null>(null)
 
-  useEffect(() => {
-    const controller = new AbortController()
+  const buildQueryParams = () => {
     const params = new URLSearchParams()
     params.set('persist', 'false')
-
     if (filters.state) params.set('state', filters.state)
     if (filters.minScore > 0) params.set('minScore', filters.minScore.toString())
     if (filters.minYears > 0) params.set('minYears', filters.minYears.toString())
     if (filters.limit > 0) params.set('limit', filters.limit.toString())
+    return params
+  }
+
+  useEffect(() => {
+    const controller = new AbortController()
+    const params = buildQueryParams()
 
     setStatus('loading')
     setErrorMessage(null)
+    setPushStatus('idle')
+    setPushMessage(null)
 
     fetch(`/api/predictions/seller?${params.toString()}`, {
       signal: controller.signal
@@ -193,73 +201,9 @@ export function SellerRadarDashboard() {
 
   function handleExportCsv() {
     if (!analysis || analysis.scores.length === 0) return
-
-    const headers = [
-      'Property ID',
-      'Address',
-      'City',
-      'State',
-      'ZIP',
-      'County',
-      'Neighborhood',
-      'Owner',
-      'Priority',
-      'Seller Score',
-      'Confidence',
-      'Equity Score',
-      'Market Heat',
-      'Affordability',
-      'Macro Momentum',
-      'Estimated Equity',
-      'Equity Upside',
-      'Years In Home'
-    ]
-
-    const rows = analysis.scores.map((score) => {
-      const { geography, components, propertySummary } = score
-      return [
-        score.propertyId,
-        score.propertyDetails.address,
-        geography.city,
-        geography.state,
-        geography.zip,
-        geography.county ?? '',
-        geography.neighborhood ?? '',
-        score.propertyDetails.owner,
-        score.propertyDetails.priority,
-        score.overallScore,
-        score.confidence,
-        components.ownerEquityReadiness.score,
-        components.marketHeat.score,
-        components.affordabilityPressure.score,
-        components.macroEconomicMomentum.score,
-        propertySummary.estimatedEquity,
-        propertySummary.equityUpside,
-        propertySummary.yearsInHome
-      ]
-    })
-
-    const csvContent = [headers, ...rows]
-      .map((row) =>
-        row
-          .map((value) => {
-            if (value == null) return ''
-            const cell = typeof value === 'string' ? value : value.toString()
-            return `"${cell.replace(/"/g, '""')}"`
-          })
-          .join(',')
-      )
-      .join('\n')
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.setAttribute('download', `seller-radar-${analysis.generatedAt}.csv`)
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
+    const params = buildQueryParams()
+    params.delete('persist')
+    window.open(`/api/predictions/seller/export?${params.toString()}`, '_blank')
   }
 
   function handleExportPdf() {
@@ -332,6 +276,35 @@ export function SellerRadarDashboard() {
     printable.print()
   }
 
+  async function handlePushToCrm() {
+    if (!analysis || analysis.scores.length === 0) return
+    try {
+      setPushStatus('sending')
+      setPushMessage(null)
+      const topIds = analysis.scores
+        .slice(0, Math.min(filters.limit, 50))
+        .map((score) => score.propertyId)
+      const response = await fetch('/api/predictions/seller/push', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          propertyIds: topIds,
+          campaign: filters.state ? `state-${filters.state}` : 'national-seller-radar'
+        })
+      })
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`)
+      }
+      const result = (await response.json()) as { forwarded: number; requested: number }
+      setPushStatus('success')
+      setPushMessage(`Queued ${result.forwarded} of ${result.requested} properties for CRM sync.`)
+    } catch (error) {
+      console.error('Failed to push leads to CRM', error)
+      setPushStatus('error')
+      setPushMessage(error instanceof Error ? error.message : 'Unknown error')
+    }
+  }
+
   return (
     <section className="section bg-surface-subtle">
       <div className="container space-y-10">
@@ -349,13 +322,36 @@ export function SellerRadarDashboard() {
                 to prioritize listing conversations. Export a lead sheet or drill into market heat spots.
               </p>
             </div>
-            <div className="flex gap-3">
-              <Button variant="secondary" onClick={handleExportPdf} disabled={!analysis?.scores.length}>
-                Export lead sheet (PDF)
-              </Button>
-              <Button onClick={handleExportCsv} disabled={!analysis?.scores.length}>
-                Export CSV
-              </Button>
+            <div className="flex flex-col items-end gap-2">
+              <div className="flex gap-3">
+                <Button
+                  variant="secondary"
+                  onClick={handleExportPdf}
+                  disabled={!analysis?.scores.length}
+                >
+                  Export lead sheet (PDF)
+                </Button>
+                <Button onClick={handleExportCsv} disabled={!analysis?.scores.length}>
+                  Export CSV
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handlePushToCrm}
+                  disabled={!analysis?.scores.length || pushStatus === 'sending'}
+                >
+                  {pushStatus === 'sending' ? 'Sending…' : 'Send to CRM'}
+                </Button>
+              </div>
+              {pushMessage ? (
+                <p
+                  className={cn(
+                    'text-xs',
+                    pushStatus === 'success' ? 'text-brand-turquoise' : 'text-brand-orange'
+                  )}
+                >
+                  {pushMessage}
+                </p>
+              ) : null}
             </div>
           </div>
         </header>
@@ -457,6 +453,8 @@ export function SellerRadarDashboard() {
                 <FrequencyCard title="Top risk signals to monitor" items={topRisks} tone="warning" />
               </div>
             </div>
+
+            <CohortSpotlight analysis={analysis} />
 
             <div className="grid gap-6 xl:grid-cols-[0.9fr,1.1fr]">
               <div className="rounded-3xl border border-brand-navy/10 bg-white p-0 shadow-card">
@@ -572,7 +570,7 @@ function SummaryGrid({ analysis }: { analysis: SellerPropensityAnalysis }) {
     {
       label: 'Average seller score',
       value: Math.round(analysis.summary.averageScore),
-      detail: `Range ${Math.round(analysis.summary.scoreRange.min)} – ${Math.round(analysis.summary.scoreRange.max)}`
+      detail: `Range ${Math.round(analysis.summary.scoreRange.min)} - ${Math.round(analysis.summary.scoreRange.max)}`
     },
     {
       label: 'Average confidence',
@@ -585,11 +583,16 @@ function SummaryGrid({ analysis }: { analysis: SellerPropensityAnalysis }) {
       detail: `${capitalize(
         getMaxWeightKey(analysis.componentWeights)
       )} weighted highest`
+    },
+    {
+      label: 'Model contribution',
+      value: `${Math.round(analysis.attributionSummary.modelAverageWeight * 100)}%`,
+      detail: 'Average ML weighting across scored properties'
     }
   ]
 
   return (
-    <div className="grid gap-4 md:grid-cols-3" data-testid="seller-radar-summary">
+    <div className="grid gap-4 md:grid-cols-4" data-testid="seller-radar-summary">
       {cards.map((card, index) => (
         <div
           key={card.label}
@@ -651,6 +654,46 @@ function FrequencyCard({
           ))
         )}
       </ul>
+    </div>
+  )
+}
+
+function CohortSpotlight({ analysis }: { analysis: SellerPropensityAnalysis }) {
+  const sections = [
+    { key: 'ownerType', title: 'Owner profile', entries: analysis.cohorts.ownerType },
+    { key: 'priority', title: 'Priority band', entries: analysis.cohorts.priority },
+    {
+      key: 'householdIncomeBand',
+      title: 'Household income',
+      entries: analysis.cohorts.householdIncomeBand
+    }
+  ] as const
+
+  return (
+    <div className="grid gap-4 md:grid-cols-3">
+      {sections.map((section) => (
+        <div
+          key={section.key}
+          className="rounded-3xl border border-brand-navy/10 bg-white p-6 shadow-card"
+        >
+          <h3 className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-navy/60">
+            {section.title}
+          </h3>
+          <ul className="mt-3 space-y-2 text-sm text-brand-navy/80">
+            {section.entries.slice(0, 3).map((entry) => (
+              <li key={entry.key} className="flex items-baseline justify-between gap-4">
+                <span className="font-semibold text-brand-navy">{entry.key}</span>
+                <span className="text-xs text-brand-navy/60">
+                  Score {entry.averageScore}
+                  {entry.averageProbability !== null
+                    ? ` · Model ${entry.averageProbability.toFixed(1)}%`
+                    : ' · Heuristic-only'}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
     </div>
   )
 }
@@ -735,11 +778,13 @@ function PropertyTable({
               <th className="px-6 py-3 text-left">Property</th>
               <th className="px-4 py-3 text-center">Seller score</th>
               <th className="px-4 py-3 text-center">Confidence</th>
+              <th className="px-4 py-3 text-center">Model</th>
+              <th className="px-4 py-3 text-center">Attribution</th>
               <th className="px-4 py-3 text-center">Equity</th>
               <th className="px-4 py-3 text-center">Market</th>
               <th className="px-4 py-3 text-center">Affordability</th>
               <th className="px-4 py-3 text-center">Macro</th>
-              <th className="px-4 py-3 text-center">Tenure</th>
+              <th className="px-4 py-3 text-center">Coverage</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-brand-navy/10">
@@ -774,7 +819,7 @@ function FragmentRow({
   isExpanded: boolean
   onToggleExpand: (propertyId: string | null) => void
 }) {
-  const { components, propertySummary, geography } = score
+  const { components, geography } = score
   const addressLine = property
     ? `${property.address}, ${property.city}, ${property.state} ${property.zip}`
     : score.propertyDetails.address
@@ -796,17 +841,25 @@ function FragmentRow({
         </td>
         <Cell value={score.overallScore} highlight="primary" />
         <Cell value={score.confidence} />
+        <td className="px-4 py-4 text-center text-sm text-brand-navy/70">
+          {score.modelPrediction ? `${score.modelPrediction.probability.toFixed(1)}%` : '—'}
+        </td>
+        <td className="px-4 py-4 text-center text-xs text-brand-navy/60">
+          {`${Math.round(score.attribution.modelWeight * 100)}% ML / ${Math.round(
+            score.attribution.heuristicWeight * 100
+          )}% heur.`}
+        </td>
         <Cell value={components.ownerEquityReadiness.score} />
         <Cell value={components.marketHeat.score} />
         <Cell value={components.affordabilityPressure.score} />
         <Cell value={components.macroEconomicMomentum.score} />
         <td className="px-4 py-4 text-center text-sm text-brand-navy/70">
-          {propertySummary.yearsInHome} yrs
+          {score.featureCompleteness ?? score.dataAvailability.coverageScore}%
         </td>
       </tr>
       {isExpanded ? (
         <tr className="bg-surface-subtle/80">
-          <td colSpan={8} className="px-6 py-5">
+          <td colSpan={10} className="px-6 py-5">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               <DetailCard title="Top drivers" tone="positive" items={score.drivers} />
               <DetailCard title="Watchlist risks" tone="warning" items={score.riskFlags} />
@@ -884,15 +937,23 @@ function EmptyState({ message }: { message: string }) {
 
 function buildCoverageSummary(score: SellerPropensityScore) {
   const sources = score.dataAvailability.sources
-  const entries = Object.entries(sources).map(([source, available]) => ({
-    label: source.toUpperCase(),
-    detail: available ? 'Cached' : 'Missing'
-  }))
-  entries.push({
-    label: 'Coverage score',
-    detail: `${score.dataAvailability.coverageScore}/100`
+  const labelMap: Record<string, string> = {
+    redfin: 'REDFIN',
+    census: 'CENSUS',
+    hud: 'HUD',
+    economic: 'ECONOMIC',
+    featureStore: 'FEATURE STORE'
+  }
+  const entries = Object.entries(sources).map(([source, available]) => {
+    const label = labelMap[source] ?? source.toUpperCase()
+    const detail = available ? 'Cached' : 'Missing'
+    return `${label}: ${detail}`
   })
-  return entries.map((entry) => `${entry.label}: ${entry.detail}`)
+  entries.push(
+    `Feature coverage: ${score.featureCompleteness ?? score.dataAvailability.coverageScore}%`
+  )
+  entries.push(`Model weight: ${Math.round(score.attribution.modelWeight * 100)}%`)
+  return entries
 }
 
 function aggregateFrequencies(

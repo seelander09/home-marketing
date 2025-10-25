@@ -44,6 +44,13 @@ export type SellerPropensityScore = {
     score: number
     modelId: string
     algorithm: string
+    rawProbability?: number
+  }
+  heuristicScore: number
+  featureCompleteness?: number
+  attribution: {
+    heuristicWeight: number
+    modelWeight: number
   }
   propertyDetails: {
     address: string
@@ -58,6 +65,7 @@ export type SellerPropensityScore = {
       census: boolean
       hud: boolean
       economic: boolean
+      featureStore: boolean
     }
   }
   geography: {
@@ -82,6 +90,11 @@ export type SellerPropensityScore = {
     listingScore: number
   }
   marketData: ComprehensiveMarketData | null
+  cohorts: {
+    ownerType: string
+    priority: string
+    householdIncomeBand: string
+  }
 }
 
 export type GeographyLevel = 'state' | 'region' | 'zip' | 'county' | 'neighborhood'
@@ -105,11 +118,25 @@ export type GeographyRankingEntry = {
 
 export type SellerPropensityLeaderboard = Record<GeographyLevel, GeographyRankingEntry[]>
 
+export type CohortBreakdownEntry = {
+  key: string
+  sampleSize: number
+  averageScore: number
+  averageProbability: number | null
+}
+
+export type SellerPropensityCohortBreakdown = {
+  ownerType: CohortBreakdownEntry[]
+  priority: CohortBreakdownEntry[]
+  householdIncomeBand: CohortBreakdownEntry[]
+}
+
 export type SellerPropensityAnalysis = {
   generatedAt: string
   sampleSize: number
   scores: SellerPropensityScore[]
   rankings: SellerPropensityLeaderboard
+  cohorts: SellerPropensityCohortBreakdown
   summary: {
     averageScore: number
     medianScore: number
@@ -120,6 +147,10 @@ export type SellerPropensityAnalysis = {
     }
   }
   componentWeights: Record<ComponentKey, number>
+  attributionSummary: {
+    heuristicAverageWeight: number
+    modelAverageWeight: number
+  }
   modelMetadata?: {
     modelId: string
     algorithm: string
@@ -657,20 +688,44 @@ export async function scorePropertyOpportunity(
   }
 
   const heuristicAggregation = aggregateComponentResults(components)
-  let blendedScore = heuristicAggregation.overallScore
+  const heuristicScore = heuristicAggregation.overallScore
+  let blendedScore = heuristicScore
   let blendedConfidence = heuristicAggregation.confidence
   let modelPrediction: SellerPropensityScore['modelPrediction']
+  let heuristicWeight = 1
+  let modelWeight = 0
+  let modelScoreValue: number | null = null
 
   const activeModel = modelWeights ?? (await getSellerModelWeights())
   if (activeModel) {
     const projection = projectFeaturesWithModel(property, activeModel)
     if (projection) {
-      const modelScore = projection.probability * 100
-      blendedScore = clamp(blendedScore * 0.6 + modelScore * 0.4, 0, 100)
-      blendedConfidence = clamp((blendedConfidence * 0.6) + 40, 0, 100)
+      modelScoreValue = projection.probability * 100
+      const auc = activeModel.metrics?.auc ?? 0.5
+      const baseModelWeight = Math.min(0.65, Math.max(0.25, auc - 0.1))
+      const completenessFactor =
+        typeof property.featureCompleteness === 'number'
+          ? Math.min(Math.max(property.featureCompleteness / 100, 0.25), 1)
+          : 0.7
+      const heuristicBase = completenessFactor * (1 - baseModelWeight)
+      const weightTotal = heuristicBase + baseModelWeight
+      heuristicWeight = weightTotal > 0 ? heuristicBase / weightTotal : 0.5
+      modelWeight = weightTotal > 0 ? baseModelWeight / weightTotal : 0.5
+
+      blendedScore = clamp(
+        heuristicScore * heuristicWeight + modelScoreValue * modelWeight,
+        0,
+        100
+      )
+      blendedConfidence = clamp(
+        heuristicAggregation.confidence * heuristicWeight + modelWeight * 100,
+        0,
+        100
+      )
       modelPrediction = {
         probability: Math.round(projection.probability * 1000) / 10,
-        score: Math.round(modelScore),
+        rawProbability: projection.probability,
+        score: Math.round(modelScoreValue),
         modelId: projection.modelId,
         algorithm: projection.algorithm
       }
@@ -690,6 +745,35 @@ export async function scorePropertyOpportunity(
     ...components.affordabilityPressure.risks,
     ...components.macroEconomicMomentum.risks
   ]
+
+  const featureCompletenessValue =
+    typeof property.featureCompleteness === 'number' ? property.featureCompleteness : undefined
+  const coverageScore = Math.round(
+    featureCompletenessValue !== undefined ? featureCompletenessValue : blendedConfidence
+  )
+  const featureStoreAvailable =
+    Boolean(property.transactionSummary || property.listingActivity || property.engagementActivity)
+
+  if (
+    property.engagementActivity?.highIntentEvents30Days &&
+    property.engagementActivity.highIntentEvents30Days > 0
+  ) {
+    drivers.push(
+      `${property.engagementActivity.highIntentEvents30Days} high-intent engagement actions (30d)`
+    )
+  }
+  if (
+    property.engagementActivity?.multiChannelScore &&
+    property.engagementActivity.multiChannelScore >= 70
+  ) {
+    drivers.push('Strong multi-channel engagement')
+  }
+  if (property.transactionSummary?.refinanceCount36m && property.transactionSummary.refinanceCount36m > 0) {
+    riskFlags.push('Recent refinance activity')
+  }
+  if (featureCompletenessValue !== undefined && featureCompletenessValue < 60) {
+    riskFlags.push('Limited feature coverage')
+  }
 
   const missingMetrics = Array.from(
     new Set(
@@ -723,13 +807,14 @@ export async function scorePropertyOpportunity(
       priority: property.priority
     },
     dataAvailability: {
-      coverageScore: Math.round(blendedConfidence),
+      coverageScore,
       missingMetrics,
       sources: {
         redfin: Boolean(marketData?.redfin),
         census: Boolean(marketData?.census),
         hud: Boolean(marketData?.hud),
-        economic: Boolean(marketData?.economic)
+        economic: Boolean(marketData?.economic),
+        featureStore: featureStoreAvailable
       }
     },
     geography: {
@@ -757,7 +842,21 @@ export async function scorePropertyOpportunity(
       yearsInHome: property.yearsInHome,
       listingScore: property.listingScore
     },
-    marketData: marketData ?? null
+    marketData: marketData ?? null,
+    heuristicScore: Math.round(heuristicScore),
+    featureCompleteness:
+      typeof property.featureCompleteness === 'number'
+        ? Math.round(property.featureCompleteness)
+        : undefined,
+    attribution: {
+      heuristicWeight: Math.round(heuristicWeight * 100) / 100,
+      modelWeight: Math.round(modelWeight * 100) / 100
+    },
+    cohorts: {
+      ownerType: property.ownerType ?? 'unknown',
+      priority: property.priority,
+      householdIncomeBand: property.householdIncomeBand ?? 'unknown'
+    }
   }
 }
 
@@ -834,6 +933,55 @@ export function buildGeographyRankings(
   }
 }
 
+function buildCohortEntries(
+  scores: SellerPropensityScore[],
+  key: keyof SellerPropensityScore['cohorts']
+): CohortBreakdownEntry[] {
+  const groups = new Map<
+    string,
+    { totalScore: number; totalProbability: number; probabilitySamples: number; count: number }
+  >()
+
+  for (const score of scores) {
+    const cohortKey = score.cohorts[key] ?? 'unknown'
+    const bucket =
+      groups.get(cohortKey) ??
+      { totalScore: 0, totalProbability: 0, probabilitySamples: 0, count: 0 }
+    bucket.totalScore += score.overallScore
+    if (score.modelPrediction?.rawProbability !== undefined) {
+      bucket.totalProbability += score.modelPrediction.rawProbability
+      bucket.probabilitySamples += 1
+    }
+    bucket.count += 1
+    groups.set(cohortKey, bucket)
+  }
+
+  return Array.from(groups.entries())
+    .map(([groupKey, bucket]) => {
+      const averageScore = bucket.totalScore / bucket.count
+      const averageProbability =
+        bucket.probabilitySamples > 0
+          ? (bucket.totalProbability / bucket.probabilitySamples) * 100
+          : null
+      return {
+        key: groupKey,
+        sampleSize: bucket.count,
+        averageScore: Math.round(averageScore * 10) / 10,
+        averageProbability:
+          averageProbability !== null ? Math.round(averageProbability * 10) / 10 : null
+      }
+    })
+    .sort((a, b) => b.averageScore - a.averageScore)
+}
+
+function buildCohortBreakdown(scores: SellerPropensityScore[]): SellerPropensityCohortBreakdown {
+  return {
+    ownerType: buildCohortEntries(scores, 'ownerType'),
+    priority: buildCohortEntries(scores, 'priority'),
+    householdIncomeBand: buildCohortEntries(scores, 'householdIncomeBand')
+  }
+}
+
 function buildAnalysisSummary(scores: SellerPropensityScore[]): SellerPropensityAnalysis['summary'] {
   if (scores.length === 0) {
     return {
@@ -882,14 +1030,34 @@ export async function scoreAndRankProperties(
   const rankings = buildGeographyRankings(selectedScores)
   const summary = buildAnalysisSummary(selectedScores)
   const propertyIds = selectedScores.map((item) => item.propertyId)
+  const cohorts = buildCohortBreakdown(selectedScores)
+  const attributionTotals = selectedScores.reduce(
+    (acc, score) => {
+      acc.heuristic += score.attribution.heuristicWeight
+      acc.model += score.attribution.modelWeight
+      return acc
+    },
+    { heuristic: 0, model: 0 }
+  )
+  const attributionSummary = selectedScores.length
+    ? {
+        heuristicAverageWeight: Math.round((attributionTotals.heuristic / selectedScores.length) * 100) / 100,
+        modelAverageWeight: Math.round((attributionTotals.model / selectedScores.length) * 100) / 100
+      }
+    : {
+        heuristicAverageWeight: 1,
+        modelAverageWeight: 0
+      }
 
   return {
     generatedAt: new Date().toISOString(),
     sampleSize: selectedScores.length,
     scores: selectedScores,
     rankings,
+    cohorts,
     summary,
     componentWeights: { ...SELLER_PROPENSITY_COMPONENT_WEIGHTS },
+    attributionSummary,
     modelMetadata: modelWeights
       ? {
           modelId: modelWeights.id,

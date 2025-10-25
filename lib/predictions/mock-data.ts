@@ -19,6 +19,9 @@ type MockProperty = {
   yearsInHome?: number
   latitude?: number
   longitude?: number
+  ownerType?: SellerPropensityScore['cohorts']['ownerType']
+  householdIncomeBand?: string
+  featureCompleteness?: number
 }
 
 type MockOptions = {
@@ -42,7 +45,10 @@ function buildComponentScore(base: number, delta: number) {
   }
 }
 
-function buildRankings(properties: MockProperty[], level: 'state' | 'region' | 'zip' | 'county' | 'neighborhood') {
+function buildRankings(
+  properties: MockProperty[],
+  level: 'state' | 'region' | 'zip' | 'county' | 'neighborhood'
+) {
   const groups = new Map<string, { property: MockProperty; score: number; confidence: number }[]>()
 
   for (const property of properties) {
@@ -111,6 +117,56 @@ function buildRankings(properties: MockProperty[], level: 'state' | 'region' | '
     .sort((a, b) => b.averageScore - a.averageScore)
 }
 
+function buildMockCohorts(scores: SellerPropensityScore[]) {
+  const build = (key: keyof SellerPropensityScore['cohorts']) => {
+    const groups = new Map<
+      string,
+      { count: number; totalScore: number; totalProbability: number; probabilitySamples: number }
+    >()
+
+    for (const score of scores) {
+      const cohortKey = score.cohorts[key] ?? 'unknown'
+      const bucket =
+        groups.get(cohortKey) ?? {
+          count: 0,
+          totalScore: 0,
+          totalProbability: 0,
+          probabilitySamples: 0
+        }
+      bucket.count += 1
+      bucket.totalScore += score.overallScore
+      if (score.modelPrediction?.rawProbability !== undefined) {
+        bucket.totalProbability += score.modelPrediction.rawProbability
+        bucket.probabilitySamples += 1
+      }
+      groups.set(cohortKey, bucket)
+    }
+
+    return Array.from(groups.entries())
+      .map(([cohortKey, bucket]) => {
+        const averageScore = bucket.totalScore / bucket.count
+        const averageProbability =
+          bucket.probabilitySamples > 0
+            ? (bucket.totalProbability / bucket.probabilitySamples) * 100
+            : null
+        return {
+          key: cohortKey,
+          sampleSize: bucket.count,
+          averageScore: Number(averageScore.toFixed(1)),
+          averageProbability:
+            averageProbability !== null ? Number(averageProbability.toFixed(1)) : null
+        }
+      })
+      .sort((a, b) => b.averageScore - a.averageScore)
+  }
+
+  return {
+    ownerType: build('ownerType'),
+    priority: build('priority'),
+    householdIncomeBand: build('householdIncomeBand')
+  }
+}
+
 function buildScore(property: MockProperty): SellerPropensityScore {
   const base = property.overallScore
   const confidence = property.confidence ?? 95
@@ -121,6 +177,18 @@ function buildScore(property: MockProperty): SellerPropensityScore {
     macroEconomicMomentum: buildComponentScore(base, 3)
   } as unknown as SellerPropensityScore['components']
 
+  const heuristicScore = Math.round(base)
+  const modelProbability = clamp((base + 8) / 110, 0, 1)
+  const modelProbabilityPct = Number((modelProbability * 100).toFixed(1))
+  const modelWeightRaw = 0.4
+  const heuristicWeight = Number((1 - modelWeightRaw).toFixed(2))
+  const modelWeight = Number(modelWeightRaw.toFixed(2))
+  const featureCompleteness = Math.round(
+    property.featureCompleteness ?? clamp(base + 6, 0, 100)
+  )
+  const ownerType = property.ownerType ?? 'move-up'
+  const householdIncomeBand = property.householdIncomeBand ?? '150k-200k'
+
   return {
     propertyId: property.propertyId,
     overallScore: Math.round(base),
@@ -128,19 +196,33 @@ function buildScore(property: MockProperty): SellerPropensityScore {
     components,
     drivers: ['High equity position', 'Strong buyer demand'],
     riskFlags: ['Monitor price reductions'],
+    modelPrediction: {
+      probability: modelProbabilityPct,
+      rawProbability: Number(modelProbability.toFixed(3)),
+      score: Math.round(modelProbabilityPct),
+      modelId: 'mock-model-latest',
+      algorithm: 'gradient-boosting'
+    },
+    heuristicScore,
+    featureCompleteness,
+    attribution: {
+      heuristicWeight,
+      modelWeight
+    },
     propertyDetails: {
       address: property.address,
       owner: property.owner,
       priority: property.priority
     },
     dataAvailability: {
-      coverageScore: 95,
+      coverageScore: featureCompleteness,
       missingMetrics: [],
       sources: {
         redfin: true,
         census: true,
         hud: true,
-        economic: true
+        economic: true,
+        featureStore: true
       }
     },
     geography: {
@@ -167,10 +249,14 @@ function buildScore(property: MockProperty): SellerPropensityScore {
       yearsInHome: property.yearsInHome ?? 6,
       listingScore: property.listingScore ?? 85
     },
-    marketData: null
+    marketData: null,
+    cohorts: {
+      ownerType,
+      priority: property.priority,
+      householdIncomeBand
+    }
   }
 }
-
 export function createSellerAnalysisMock(
   properties: MockProperty[],
   options: MockOptions = {}
@@ -203,12 +289,31 @@ export function createSellerAnalysisMock(
   }
 
   const generatedAt = new Date().toISOString()
+  const cohorts = buildMockCohorts(scores)
+  const attributionSummary =
+    scores.length > 0
+      ? {
+          heuristicAverageWeight: Number(
+            (
+              scores.reduce((acc, score) => acc + score.attribution.heuristicWeight, 0) /
+              scores.length
+            ).toFixed(2)
+          ),
+          modelAverageWeight: Number(
+            (
+              scores.reduce((acc, score) => acc + score.attribution.modelWeight, 0) /
+              scores.length
+            ).toFixed(2)
+          )
+        }
+      : { heuristicAverageWeight: 1, modelAverageWeight: 0 }
 
   const analysis: SellerPropensityAnalysis = {
     generatedAt,
     sampleSize: scores.length,
     scores,
     rankings,
+    cohorts,
     summary: {
       averageScore: summary.averageScore,
       medianScore: Number(summary.medianScore.toFixed(1)),
@@ -219,6 +324,7 @@ export function createSellerAnalysisMock(
       }
     },
     componentWeights: { ...SELLER_PROPENSITY_COMPONENT_WEIGHTS },
+    attributionSummary,
     inputs: {
       filters: options.filters ?? null,
       limit: options.limit ?? null,
@@ -233,7 +339,9 @@ export function createSellerAnalysisMock(
       limit: options.limit ?? null,
       persisted: false,
       generatedAt,
-      componentWeights: analysis.componentWeights
+      componentWeights: analysis.componentWeights,
+      cohortDimensions: Object.keys(analysis.cohorts),
+      attributionSummary: analysis.attributionSummary
     }
   }
 }
@@ -252,6 +360,9 @@ export const DEFAULT_SELLER_ANALYSIS_MOCK = createSellerAnalysisResponse(
       address: '789 Elm Drive',
       owner: 'Michael Brown',
       priority: 'High Priority',
+      ownerType: 'move-up',
+      householdIncomeBand: '150k-200k',
+      featureCompleteness: 92,
       city: 'Austin',
       state: 'TX',
       zip: '78701',
@@ -270,6 +381,9 @@ export const DEFAULT_SELLER_ANALYSIS_MOCK = createSellerAnalysisResponse(
       address: '987 Birch Boulevard',
       owner: 'Jennifer Garcia',
       priority: 'Medium Priority',
+      ownerType: 'move-up',
+      householdIncomeBand: '125k-150k',
+      featureCompleteness: 88,
       city: 'Denver',
       state: 'CO',
       zip: '80202',
@@ -288,6 +402,9 @@ export const DEFAULT_SELLER_ANALYSIS_MOCK = createSellerAnalysisResponse(
       address: '45 Maple Avenue',
       owner: 'Priya Patel',
       priority: 'Medium Priority',
+      ownerType: 'empty-nester',
+      householdIncomeBand: '200k+',
+      featureCompleteness: 85,
       city: 'Chicago',
       state: 'IL',
       zip: '60611',

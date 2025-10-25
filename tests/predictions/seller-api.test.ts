@@ -99,12 +99,15 @@ describe('/api/predictions/seller', () => {
     expect(payload.analysis.scores.length).toBeGreaterThan(0)
     expect(payload.analysis.inputs.filters).toMatchObject({ state: 'TX', minScore: 70 })
     expect(payload.metadata.persisted).toBe(true)
+    expect(payload.metadata.attributionSummary).toBeDefined()
+    expect(payload.metadata.cohortDimensions).toContain('ownerType')
 
     const logEntries = await readRunLog()
     expect(logEntries.length).toBe(1)
     expect(logEntries[0]).toMatchObject({
       filters: payload.analysis.inputs.filters,
-      averageScore: payload.analysis.summary.averageScore
+      averageScore: payload.analysis.summary.averageScore,
+      attributionSummary: payload.analysis.attributionSummary
     })
   })
 

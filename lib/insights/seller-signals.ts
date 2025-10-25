@@ -6,6 +6,11 @@ export type SellerSignals = {
   digitalEngagementScore: number | null
   neighborhoodMomentum: number | null
   lifeEventScore: number | null
+  listingMomentum: number | null
+  transactionRecencyScore: number | null
+  refinanceIntensity: number | null
+  engagementIntentScore: number | null
+  eventsLast90Days: number | null
   flags: string[]
 }
 
@@ -27,6 +32,14 @@ export type SellerSignalInput = {
   digitalEngagementScore?: number | null
   neighborsListed12Months?: number | null
   lifeEventSignals?: string[]
+  recentListingCount?: number
+  averageDaysOnMarket?: number | null
+  transactionRecencyMonths?: number | null
+  refinanceCount36m?: number
+  highIntentEngagement30d?: number
+  engagementMultiChannelScore?: number | null
+  eventsLast90Days?: number
+  ownershipDurationYears?: number | null
 }
 
 export type SellerFeatureInput = SellerSignalInput & {
@@ -103,6 +116,52 @@ export function buildSellerSignals(input: SellerSignalInput): SellerSignals {
       : null
 
   const lifeEventScore = computeLifeEventScore(input.lifeEventSignals)
+
+  const listingMomentum =
+    typeof input.recentListingCount === 'number'
+      ? Math.round(
+          Math.min(
+            100,
+            input.recentListingCount * 22 +
+              Math.max(0, 60 - (input.averageDaysOnMarket ?? 60)) * 0.8
+          )
+        )
+      : null
+
+  const transactionRecencyScore =
+    input.transactionRecencyMonths !== undefined && input.transactionRecencyMonths !== null
+      ? Math.max(0, 100 - Math.min(input.transactionRecencyMonths, 60) * 1.5)
+      : null
+
+  const refinanceIntensity =
+    typeof input.refinanceCount36m === 'number'
+      ? Math.min(100, input.refinanceCount36m * 35)
+      : null
+
+  const eventsLast90Days =
+    typeof input.eventsLast90Days === 'number' ? input.eventsLast90Days : null
+
+  const engagementSource =
+    typeof input.engagementMultiChannelScore === 'number'
+      ? input.engagementMultiChannelScore
+      : typeof input.digitalEngagementScore === 'number'
+        ? input.digitalEngagementScore
+        : null
+
+  const engagementIntentScore =
+    engagementSource !== null
+      ? Math.round(
+          Math.min(
+            100,
+            engagementSource * 0.6 +
+              (input.highIntentEngagement30d ?? 0) * 10 +
+              (eventsLast90Days ?? 0) * 2
+          )
+        )
+      : typeof input.highIntentEngagement30d === 'number'
+        ? Math.round(Math.min(100, input.highIntentEngagement30d * 12))
+        : null
+
   const flags: string[] = []
 
   if (loanToValue !== null && loanToValue > 0.8) {
@@ -117,6 +176,18 @@ export function buildSellerSignals(input: SellerSignalInput): SellerSignals {
   if (neighborhoodMomentum !== null && neighborhoodMomentum >= 60) {
     flags.push('neighborhood-turnover')
   }
+  if (listingMomentum !== null && listingMomentum >= 70) {
+    flags.push('recent-listing-activity')
+  }
+  if (transactionRecencyScore !== null && transactionRecencyScore <= 35) {
+    flags.push('recent-transaction-history')
+  }
+  if (refinanceIntensity !== null && refinanceIntensity >= 60) {
+    flags.push('refinance-signal')
+  }
+  if (engagementIntentScore !== null && engagementIntentScore >= 65) {
+    flags.push('high-intent-engagement')
+  }
 
   return {
     equityRatio: equityRatio !== null ? Math.round(equityRatio * 1000) / 10 : null,
@@ -126,6 +197,11 @@ export function buildSellerSignals(input: SellerSignalInput): SellerSignals {
     digitalEngagementScore: input.digitalEngagementScore ?? null,
     neighborhoodMomentum,
     lifeEventScore,
+    listingMomentum,
+    transactionRecencyScore,
+    refinanceIntensity,
+    engagementIntentScore,
+    eventsLast90Days,
     flags
   }
 }
@@ -146,7 +222,18 @@ export function buildSellerFeatureVector(input: SellerFeatureInput): SellerFeatu
     'estimatedEquity',
     'equityUpside',
     'loanBalance',
-    'ownerAge'
+    'ownerAge',
+    'listingMomentum',
+    'transactionRecencyScore',
+    'refinanceIntensity',
+    'engagementIntentScore',
+    'recentListingCount',
+    'averageDaysOnMarket',
+    'highIntentEngagement30d',
+    'multiChannelEngagementScore',
+    'transactionRecencyMonths',
+    'refinanceCount36m',
+    'eventsLast90Days'
   ]
 
   const values = [
@@ -162,7 +249,18 @@ export function buildSellerFeatureVector(input: SellerFeatureInput): SellerFeatu
     input.estimatedEquity,
     input.equityUpside,
     input.loanBalance ?? 0,
-    input.ownerAge ?? 0
+    input.ownerAge ?? 0,
+    signals.listingMomentum ?? 0,
+    signals.transactionRecencyScore ?? 0,
+    signals.refinanceIntensity ?? 0,
+    signals.engagementIntentScore ?? 0,
+    input.recentListingCount ?? 0,
+    input.averageDaysOnMarket ?? 0,
+    input.highIntentEngagement30d ?? 0,
+    input.engagementMultiChannelScore ?? 0,
+    input.transactionRecencyMonths ?? 0,
+    input.refinanceCount36m ?? 0,
+    signals.eventsLast90Days ?? 0
   ]
 
   return {

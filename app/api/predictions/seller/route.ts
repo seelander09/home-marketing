@@ -71,7 +71,9 @@ export async function GET(request: Request) {
         persisted: persistRuns,
         generatedAt: analysis.generatedAt,
         componentWeights: analysis.componentWeights,
-        modelMetadata: analysis.modelMetadata ?? null
+        attributionSummary: analysis.attributionSummary,
+        modelMetadata: analysis.modelMetadata ?? null,
+        cohortDimensions: Object.keys(analysis.cohorts)
       }
     })
   } catch (error) {

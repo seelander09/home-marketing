@@ -24,6 +24,7 @@ export type SellerPropensityRunLogEntry = {
   }
   averageConfidence: number
   componentWeights: Record<string, number>
+  attributionSummary: SellerPropensityAnalysis['attributionSummary']
   modelMetadata?: SellerPropensityAnalysis['modelMetadata']
 }
 
@@ -58,6 +59,7 @@ export async function appendSellerPropensityRunLog(
     scoreRange: analysis.summary.scoreRange,
     averageConfidence: analysis.summary.averageConfidence,
     componentWeights: analysis.componentWeights,
+    attributionSummary: analysis.attributionSummary,
     modelMetadata: analysis.modelMetadata
   }
 

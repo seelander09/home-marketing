@@ -1,0 +1,29 @@
+name: Nightly Seller Refresh
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  nightly-seller:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Refresh feature store, train model, and score sellers
+        run: npm run nightly:seller
+        env:
+          CRM_SELLER_WEBHOOK_URL: ${{ secrets.CRM_SELLER_WEBHOOK_URL }}
+          CRM_SELLER_WEBHOOK_TOKEN: ${{ secrets.CRM_SELLER_WEBHOOK_TOKEN }}
