@@ -1,7 +1,7 @@
-import { Page, expect } from '@playwright/test';
+import { Locator, Page, expect } from '@playwright/test';
 
 export class TestHelpers {
-  constructor(private page: Page) {}
+  constructor(private readonly page: Page) {}
 
   /**
    * Wait for page to be fully loaded
@@ -35,8 +35,8 @@ export class TestHelpers {
   /**
    * Fill form field with validation
    */
-  async fillFormField(selector: string, value: string, options?: { clear?: boolean }) {
-    const field = this.page.locator(selector);
+  async fillFormField(target: Locator | string, value: string, options?: { clear?: boolean }) {
+    const field = typeof target === 'string' ? this.page.locator(target) : target;
     await field.waitFor({ state: 'visible' });
     
     if (options?.clear) {

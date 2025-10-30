@@ -1,4 +1,4 @@
-import { test as base, expect } from '@playwright/test';
+import { Page, Route, test as base, expect } from '@playwright/test';
 import { HomePage } from '../page-objects/HomePage';
 import { ContactPage } from '../page-objects/ContactPage';
 import { TestHelpers } from '../fixtures/test-helpers';
@@ -46,9 +46,8 @@ test.beforeEach(async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   
   // Enable request interception for API mocking
-  await page.route('**/api/**', route => {
-    // Allow API calls by default
-    route.continue();
+  await page.route('**/api/**', async (route) => {
+    await route.continue();
   });
 });
 
@@ -100,15 +99,15 @@ export const testDataHelpers = {
 
 // API testing helpers
 export const apiHelpers = {
-  waitForApiResponse: async (page: any, urlPattern: string, timeout = 10000) => {
+  waitForApiResponse: async (page: Page, urlPattern: string, timeout = 10000) => {
     return await page.waitForResponse(
-      response => response.url().includes(urlPattern) && response.status() === 200,
+      (response) => response.url().includes(urlPattern) && response.status() === 200,
       { timeout }
     );
   },
   
-  mockApiResponse: async (page: any, urlPattern: string, mockData: any) => {
-    await page.route(urlPattern, route => {
+  mockApiResponse: async (page: Page, urlPattern: string, mockData: unknown) => {
+    await page.route(urlPattern, async (route) => {
       route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -117,8 +116,8 @@ export const apiHelpers = {
     });
   },
   
-  mockApiError: async (page: any, urlPattern: string, statusCode = 500) => {
-    await page.route(urlPattern, route => {
+  mockApiError: async (page: Page, urlPattern: string, statusCode = 500) => {
+    await page.route(urlPattern, async (route) => {
       route.fulfill({
         status: statusCode,
         contentType: 'application/json',
@@ -130,29 +129,29 @@ export const apiHelpers = {
 
 // Performance testing helpers
 export const performanceHelpers = {
-  measurePageLoad: async (page: any) => {
+  measurePageLoad: async (page: Page) => {
     const startTime = Date.now();
     await page.waitForLoadState('networkidle');
     const endTime = Date.now();
     return endTime - startTime;
   },
   
-  getCoreWebVitals: async (page: any) => {
+  getCoreWebVitals: async (page: Page) => {
     return await page.evaluate(() => {
-      return new Promise(resolve => {
-        const vitals: any = {};
+      return new Promise<Record<string, number | undefined>>((resolve) => {
+        const vitals: Record<string, number | undefined> = {};
         
         // First Contentful Paint
-        new PerformanceObserver(list => {
+        new PerformanceObserver((list) => {
           const entries = list.getEntries();
-          const fcpEntry = entries.find(entry => entry.name === 'first-contentful-paint');
+          const fcpEntry = entries.find((entry) => entry.name === 'first-contentful-paint');
           if (fcpEntry) {
             vitals.fcp = fcpEntry.startTime;
           }
         }).observe({ entryTypes: ['paint'] });
         
         // Largest Contentful Paint
-        new PerformanceObserver(list => {
+        new PerformanceObserver((list) => {
           const entries = list.getEntries();
           const lcpEntry = entries[entries.length - 1];
           if (lcpEntry) {
@@ -161,11 +160,12 @@ export const performanceHelpers = {
         }).observe({ entryTypes: ['largest-contentful-paint'] });
         
         // Cumulative Layout Shift
-        new PerformanceObserver(list => {
+        new PerformanceObserver((list) => {
           let clsValue = 0;
           for (const entry of list.getEntries()) {
-            if (!entry.hadRecentInput) {
-              clsValue += entry.value;
+            const layoutShift = entry as PerformanceEntry & { hadRecentInput?: boolean; value?: number };
+            if (!layoutShift.hadRecentInput) {
+              clsValue += layoutShift.value ?? 0;
             }
           }
           vitals.cls = clsValue;
@@ -180,7 +180,7 @@ export const performanceHelpers = {
 
 // Accessibility testing helpers
 export const accessibilityHelpers = {
-  checkColorContrast: async (page: any) => {
+  checkColorContrast: async (page: Page) => {
     // Basic color contrast check
     const textElements = await page.locator('p, h1, h2, h3, h4, h5, h6, a, button, label').all();
     
@@ -198,14 +198,14 @@ export const accessibilityHelpers = {
     }
   },
   
-  checkKeyboardNavigation: async (page: any) => {
+  checkKeyboardNavigation: async (page: Page) => {
     // Test Tab navigation
     await page.keyboard.press('Tab');
     const focusedElement = await page.evaluate(() => document.activeElement?.tagName);
     expect(focusedElement).toBeTruthy();
   },
   
-  checkScreenReaderSupport: async (page: any) => {
+  checkScreenReaderSupport: async (page: Page) => {
     // Check for proper ARIA attributes
     const interactiveElements = await page.locator('button, input, select, textarea, a').all();
     

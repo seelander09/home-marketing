@@ -1,4 +1,4 @@
-import { buildHUDCache } from '../lib/insights/hud.ts'
+import { buildHUDCache } from '../lib/insights/hud'
 
 async function main() {
   try {

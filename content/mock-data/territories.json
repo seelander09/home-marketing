@@ -7,7 +7,8 @@
         "city":  "Austin",
         "medianHomeValue":  645000,
         "score":  87,
-        "longitude":  -97.7437
+        "longitude":  -97.7437,
+        "geojson": "{\"type\":\"Polygon\",\"coordinates\":[[[-97.752,30.278],[-97.736,30.278],[-97.736,30.259],[-97.752,30.259],[-97.752,30.278]]]}"
     },
     {
         "turnoverRate":  0.075,
@@ -17,7 +18,8 @@
         "city":  "Scottsdale",
         "medianHomeValue":  720000,
         "score":  90,
-        "longitude":  -111.9247
+        "longitude":  -111.9247,
+        "geojson": "{\"type\":\"Polygon\",\"coordinates\":[[[-111.947,33.505],[-111.904,33.505],[-111.904,33.48],[-111.947,33.48],[-111.947,33.505]]]}"
     },
     {
         "turnoverRate":  0.07,
@@ -27,6 +29,7 @@
         "city":  "Seattle",
         "medianHomeValue":  815000,
         "score":  83,
-        "longitude":  -122.35
+        "longitude":  -122.35,
+        "geojson": "{\"type\":\"Polygon\",\"coordinates\":[[[-122.357,47.637],[-122.334,47.637],[-122.334,47.621],[-122.357,47.621],[-122.357,47.637]]]}"
     }
 ]

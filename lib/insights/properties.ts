@@ -112,7 +112,7 @@ const propertiesDataset: PropertyOpportunity[] = (data as PropertyOpportunity[])
     highIntentEngagement30d: engagementSummary?.highIntentEvents30Days ?? 0,
     engagementMultiChannelScore:
       engagementSummary?.multiChannelScore ?? digitalEngagementScore ?? null,
-    eventsLast90Days: engagementSummary?.eventsLast90Days ?? null,
+    eventsLast90Days: engagementSummary?.eventsLast90Days ?? undefined,
     ownershipDurationYears: transactionSummary?.ownershipDurationYears ?? derivedYearsInHome
   })
 
@@ -138,7 +138,7 @@ const propertiesDataset: PropertyOpportunity[] = (data as PropertyOpportunity[])
     highIntentEngagement30d: engagementSummary?.highIntentEvents30Days ?? 0,
     engagementMultiChannelScore:
       engagementSummary?.multiChannelScore ?? digitalEngagementScore ?? null,
-    eventsLast90Days: engagementSummary?.eventsLast90Days ?? null,
+    eventsLast90Days: engagementSummary?.eventsLast90Days ?? undefined,
     ownershipDurationYears: transactionSummary?.ownershipDurationYears ?? derivedYearsInHome
   })
 
@@ -258,26 +258,24 @@ export function getPropertyOpportunities(filters: PropertyFilter = {}): {
     if (ownerType && property.ownerType && property.ownerType !== ownerType) {
       return false
     }
-    if (
-      typeof minDigitalEngagement === 'number' &&
-      property.sellerSignals?.digitalEngagementScore !== null &&
-      property.sellerSignals?.digitalEngagementScore < minDigitalEngagement
-    ) {
-      return false
+    const signals = property.sellerSignals
+    if (typeof minDigitalEngagement === 'number') {
+      const digitalEngagementScore = signals?.digitalEngagementScore
+      if (digitalEngagementScore != null && digitalEngagementScore < minDigitalEngagement) {
+        return false
+      }
     }
-    if (
-      typeof minEquityRatio === 'number' &&
-      property.sellerSignals?.equityRatio !== null &&
-      property.sellerSignals.equityRatio < minEquityRatio
-    ) {
-      return false
+    if (typeof minEquityRatio === 'number') {
+      const equityRatio = signals?.equityRatio
+      if (equityRatio != null && equityRatio < minEquityRatio) {
+        return false
+      }
     }
-    if (
-      typeof minLifeEventScore === 'number' &&
-      property.sellerSignals?.lifeEventScore !== null &&
-      property.sellerSignals.lifeEventScore < minLifeEventScore
-    ) {
-      return false
+    if (typeof minLifeEventScore === 'number') {
+      const lifeEventScore = signals?.lifeEventScore
+      if (lifeEventScore != null && lifeEventScore < minLifeEventScore) {
+        return false
+      }
     }
     if (
       typeof minNeighborhoodListings === 'number' &&

@@ -99,7 +99,7 @@ function calculateInvestmentPotential(
   if (economic?.economicIndicators.unemploymentRate && economic.economicIndicators.unemploymentRate < 5) score += 10
   
   // Population growth
-  if (census?.demographics.totalPopulation) {
+  if (census?.demographics?.totalPopulation) {
     // This would need historical data for actual growth calculation
     score += 5 // Placeholder
   }
@@ -143,7 +143,7 @@ function generateRiskFactors(
     risks.push('High mortgage rates')
   }
   
-  if (census?.demographics.povertyRate && census.demographics.povertyRate > 20) {
+  if (census?.demographics?.povertyRate && census.demographics.povertyRate > 20) {
     risks.push('High poverty rate')
   }
   
@@ -170,11 +170,11 @@ function generateOpportunities(
     opportunities.push('Low unemployment')
   }
   
-  if (census?.demographics.medianHouseholdIncome && census.demographics.medianHouseholdIncome > 75000) {
+  if (census?.demographics?.medianHouseholdIncome && census.demographics.medianHouseholdIncome > 75000) {
     opportunities.push('High median income')
   }
   
-  if (census?.housingUnitsBuilt.after2020 && census.housingUnitsBuilt.after2020 > 100) {
+  if (census?.housingUnitsBuilt?.after2020 && census.housingUnitsBuilt.after2020 > 100) {
     opportunities.push('New construction activity')
   }
   
@@ -211,8 +211,8 @@ export async function getComprehensiveMarketData(request: MarketDataRequest): Pr
   let regionType: ComprehensiveMarketData['regionType']
   let regionCode: string
   let regionName: string
-  let stateCode: string
-  let stateName: string
+  let stateCode = ''
+  let stateName = ''
   
   let redfin: RedfinMarketSnapshot | null = null
   let census: CensusHousingData | null = null
@@ -261,8 +261,15 @@ export async function getComprehensiveMarketData(request: MarketDataRequest): Pr
   economic = await getFREDEconomicData()
   
   // Calculate insights if requested
-  let insights: ComprehensiveMarketData['insights'] | undefined
-  
+  let insights: ComprehensiveMarketData['insights'] = {
+    marketHealth: null,
+    affordabilityScore: null,
+    investmentPotential: null,
+    marketVelocity: null,
+    riskFactors: [],
+    opportunities: []
+  }
+
   if (includeInsights) {
     const affordabilityScore = calculateAffordabilityScore(redfin, census, economic)
     const investmentPotential = calculateInvestmentPotential(redfin, census, hud, economic)

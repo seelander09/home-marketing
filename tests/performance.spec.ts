@@ -26,10 +26,10 @@ test.describe('Performance Tests', () => {
     
     // Measure First Contentful Paint (FCP)
     const fcp = await page.evaluate(() => {
-      return new Promise(resolve => {
-        new PerformanceObserver(list => {
+      return new Promise<number>((resolve) => {
+        new PerformanceObserver((list) => {
           const entries = list.getEntries();
-          const fcpEntry = entries.find(entry => entry.name === 'first-contentful-paint');
+          const fcpEntry = entries.find((entry) => entry.name === 'first-contentful-paint');
           if (fcpEntry) {
             resolve(fcpEntry.startTime);
           }
@@ -47,8 +47,8 @@ test.describe('Performance Tests', () => {
     await page.waitForLoadState('networkidle');
     
     const lcp = await page.evaluate(() => {
-      return new Promise(resolve => {
-        new PerformanceObserver(list => {
+      return new Promise<number>((resolve) => {
+        new PerformanceObserver((list) => {
           const entries = list.getEntries();
           const lcpEntry = entries[entries.length - 1];
           if (lcpEntry) {
@@ -68,12 +68,13 @@ test.describe('Performance Tests', () => {
     await page.waitForLoadState('networkidle');
     
     const cls = await page.evaluate(() => {
-      return new Promise(resolve => {
+      return new Promise<number>((resolve) => {
         let clsValue = 0;
-        new PerformanceObserver(list => {
+        new PerformanceObserver((list) => {
           for (const entry of list.getEntries()) {
-            if (!entry.hadRecentInput) {
-              clsValue += entry.value;
+            const layoutShift = entry as PerformanceEntry & { hadRecentInput?: boolean; value?: number };
+            if (!layoutShift.hadRecentInput) {
+              clsValue += layoutShift.value ?? 0;
             }
           }
           resolve(clsValue);

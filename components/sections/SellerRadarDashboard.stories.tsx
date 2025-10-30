@@ -52,8 +52,9 @@ const californiaAnalysis = createSellerAnalysisResponse(
 function SellerRadarStoryWrapper() {
   useEffect(() => {
     const originalFetch = window.fetch.bind(window)
-    window.fetch = async (input: RequestInfo, init?: RequestInit) => {
-      const url = typeof input === 'string' ? input : input.url
+    window.fetch = async (...args: Parameters<typeof window.fetch>): ReturnType<typeof window.fetch> => {
+      const [input, init] = args
+      const url = typeof input === 'string' || input instanceof URL ? input.toString() : input.url
       if (url.includes('/api/predictions/seller')) {
         const parsed = new URL(url, window.location.origin)
         const state = parsed.searchParams.get('state')
@@ -65,7 +66,7 @@ function SellerRadarStoryWrapper() {
           headers: { 'Content-Type': 'application/json' }
         })
       }
-      return originalFetch(input, init)
+      return originalFetch(...args)
     }
 
     return () => {

@@ -9,7 +9,7 @@ import {
   trainSellerGradientBoosting,
   trainSellerLogisticRegression,
   type SellerModelWeights
-} from '../../lib/models/seller-training.ts'
+} from '../../lib/models/seller-training'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)

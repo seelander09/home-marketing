@@ -259,7 +259,7 @@ export async function buildHUDCache(): Promise<void> {
     fetchHUDData('metro')
   ])
 
-  const outputs = [
+  const outputs: Array<[string, HUDCache]> = [
     ['state.json', stateData],
     ['county.json', countyData],
     ['metro.json', metroData]

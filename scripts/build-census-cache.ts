@@ -1,4 +1,4 @@
-import { buildCensusCache } from '../lib/insights/census.ts'
+import { buildCensusCache } from '../lib/insights/census'
 
 async function main() {
   try {

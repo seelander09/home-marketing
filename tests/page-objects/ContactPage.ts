@@ -2,7 +2,7 @@ import { Page, Locator, expect } from '@playwright/test';
 import { TestHelpers } from '../fixtures/test-helpers';
 
 export class ContactPage {
-  private helpers: TestHelpers;
+  public readonly helpers: TestHelpers;
   
   // Page elements
   public readonly pageTitle: Locator;
@@ -23,7 +23,7 @@ export class ContactPage {
   public readonly fieldErrors: Locator;
   public readonly requiredFields: Locator;
 
-  constructor(private page: Page) {
+  constructor(public readonly page: Page) {
     this.helpers = new TestHelpers(page);
     
     this.pageTitle = page.locator('h1').first();

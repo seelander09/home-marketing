@@ -1,4 +1,4 @@
-import { buildFREDCache } from '../lib/insights/fred.ts'
+import { buildFREDCache } from '../lib/insights/fred'
 
 async function main() {
   try {

@@ -1,4 +1,5 @@
 import { SELLER_PROPENSITY_COMPONENT_WEIGHTS, type SellerPropensityAnalysis, type SellerPropensityScore } from '@/lib/predictions/seller-propensity'
+import type { PropertyFilter } from '@/lib/insights/properties'
 
 type MockProperty = {
   propertyId: string
@@ -308,6 +309,9 @@ export function createSellerAnalysisMock(
         }
       : { heuristicAverageWeight: 1, modelAverageWeight: 0 }
 
+  const normalizedFilters = (options.filters ?? undefined) as PropertyFilter | undefined
+  const normalizedLimit = typeof options.limit === 'number' ? options.limit : undefined
+
   const analysis: SellerPropensityAnalysis = {
     generatedAt,
     sampleSize: scores.length,
@@ -326,8 +330,8 @@ export function createSellerAnalysisMock(
     componentWeights: { ...SELLER_PROPENSITY_COMPONENT_WEIGHTS },
     attributionSummary,
     inputs: {
-      filters: options.filters ?? null,
-      limit: options.limit ?? null,
+      filters: normalizedFilters,
+      limit: normalizedLimit,
       propertyIds: scores.map((score) => score.propertyId)
     }
   }
@@ -335,8 +339,8 @@ export function createSellerAnalysisMock(
   return {
     analysis,
     metadata: {
-      filters: options.filters ?? null,
-      limit: options.limit ?? null,
+      filters: normalizedFilters,
+      limit: normalizedLimit,
       persisted: false,
       generatedAt,
       componentWeights: analysis.componentWeights,

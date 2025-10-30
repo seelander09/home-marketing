@@ -71,7 +71,7 @@ const FRED_SERIES = {
   DRCCLACBS: 'mortgageDelinquencyRate', // Delinquency Rate
 }
 
-let economicDataPromise: Promise<FREDEconomicData> | null = null
+let economicDataPromise: Promise<FREDEconomicData | null> | null = null
 const FRED_USER_AGENT = 'home-marketing/1.0 (+https://example.com)'
 
 async function ensureCacheDir() {

@@ -73,17 +73,18 @@ async function main() {
 
   const analysis = await scoreAndRankProperties(properties)
 
-  const labelLookup = new Map(properties.map((property) => [property.id, property.sellerOutcome!]))
-  const scores = analysis.scores
-    .map((score) => {
-      const label = labelLookup.get(score.propertyId)
-      if (label === undefined) {
-        return null
-      }
-      const prediction = score.modelPrediction?.score ?? score.overallScore
-      return { label, score: prediction }
-    })
-    .filter((entry): entry is { label: number; score: number } => Boolean(entry))
+  const labelLookup = new Map<string, 0 | 1>(
+    properties.map((property) => [property.id, property.sellerOutcome as 0 | 1])
+  )
+  const scores = analysis.scores.reduce<Array<{ label: 0 | 1; score: number }>>((acc, score) => {
+    const label = labelLookup.get(score.propertyId)
+    if (label === undefined) {
+      return acc
+    }
+    const prediction = score.modelPrediction?.score ?? score.overallScore
+    acc.push({ label, score: prediction })
+    return acc
+  }, [])
 
   const thresholds = [45, 55, 65, 75, 85]
   const matrices = thresholds.map((threshold) => buildConfusionMatrix(scores, threshold))

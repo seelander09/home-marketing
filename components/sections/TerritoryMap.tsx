@@ -2,10 +2,10 @@
 
 import dynamic from 'next/dynamic'
 import { SmartLink } from '@/components/ui/SmartLink'
-import type { TerritoryMapConfig } from '@/lib/cms/types'
+import type { TerritoryDatasetEntry, TerritoryMapConfig } from '@/lib/cms/types'
 
-const TerritoryMapClient = dynamic(
-  () => import('@/components/sections/TerritoryMap.client'),
+const TerritoryMapClient = dynamic<{ dataset: TerritoryDatasetEntry[] }>(
+  () => import('@/components/sections/TerritoryMap.client').then((module) => module.TerritoryMapClient),
   { ssr: false }
 )
 
@@ -22,7 +22,7 @@ export function TerritoryMap({ config }: { config: TerritoryMapConfig }) {
           </SmartLink>
           <p className="text-xs text-brand-navy/50">Data updates weekly across 250+ SmartLead micro-territories.</p>
         </div>
-        <div className="h-[420px] overflow-hidden rounded-3xl border border-brand-navy/10 shadow-card">
+        <div className="h-[420px]">
           <TerritoryMapClient dataset={config.dataset} />
         </div>
       </div>

@@ -3,7 +3,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { evaluateMarketCaches } from '../../lib/insights/data-quality/market-cache-validator.ts'
+import { evaluateMarketCaches } from '../../lib/insights/data-quality/market-cache-validator'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)

@@ -9,6 +9,9 @@ import {
   listAllPropertyOpportunities,
   type PropertyOpportunity
 } from '@/lib/insights/properties'
+import { OpportunityMap } from '@/components/maps'
+import territoriesData from '@/content/mock-data/territories.json'
+import type { TerritoryDatasetEntry } from '@/lib/cms/types'
 
 type MarketSnapshot = {
   regionType: 'state' | 'city' | 'zip'
@@ -49,6 +52,8 @@ const percentOfOneFormatter = new Intl.NumberFormat('en-US', {
 const DEFAULT_MIN_SCORE = 60
 const DEFAULT_MIN_EQUITY = 200000
 const DEFAULT_MIN_YEARS = 5
+
+const territoryDataset = territoriesData as TerritoryDatasetEntry[]
 
 export function EquityOpportunityDashboard() {
   const [query, setQuery] = useState('')
@@ -168,6 +173,14 @@ export function EquityOpportunityDashboard() {
             onReset={handleReset}
           />
           <div className="space-y-6">
+            <OpportunityMap
+              properties={properties}
+              territories={territoryDataset}
+              minScore={minScore}
+              minEquity={minEquity}
+              height={420}
+              className="overflow-hidden rounded-3xl border border-brand-navy/10 shadow-card"
+            />
             <SummaryRow summary={summary} />
             <MarketSnapshotPanel snapshot={marketSnapshot} status={marketStatus} queryLabel={marketQueryLabel} />
             {properties.length ? (

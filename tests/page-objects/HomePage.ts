@@ -2,7 +2,7 @@ import { Page, Locator, expect } from '@playwright/test';
 import { TestHelpers } from '../fixtures/test-helpers';
 
 export class HomePage {
-  private helpers: TestHelpers;
+  public readonly helpers: TestHelpers;
   
   // Navigation elements
   public readonly navigation: Locator;
@@ -33,7 +33,7 @@ export class HomePage {
   public readonly footer: Locator;
   public readonly footerLinks: Locator;
 
-  constructor(private page: Page) {
+  constructor(public readonly page: Page) {
     this.helpers = new TestHelpers(page);
     
     // Navigation

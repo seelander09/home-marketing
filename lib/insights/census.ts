@@ -362,7 +362,7 @@ export async function buildCensusCache(): Promise<void> {
     fetchCensusData('zip')
   ])
 
-  const outputs = [
+  const outputs: Array<[string, CensusCache]> = [
     ['state.json', stateData],
     ['county.json', countyData],
     ['place.json', placeData],
