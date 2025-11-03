@@ -1,6 +1,7 @@
 ﻿"use client"
 
 import { useEffect, useMemo, useState } from 'react'
+import dynamic from 'next/dynamic'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { cn, formatNumber } from '@/lib/utils'
@@ -9,9 +10,18 @@ import {
   listAllPropertyOpportunities,
   type PropertyOpportunity
 } from '@/lib/insights/properties'
-import { OpportunityMap } from '@/components/maps'
 import territoriesData from '@/content/mock-data/territories.json'
 import type { TerritoryDatasetEntry } from '@/lib/cms/types'
+
+// Dynamically import map component to avoid SSR issues with Leaflet
+const OpportunityMap = dynamic(() => import('@/components/maps').then(mod => mod.OpportunityMap), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-[420px] items-center justify-center overflow-hidden rounded-3xl border border-brand-navy/10 bg-surface-subtle shadow-card">
+      <p className="text-sm text-brand-navy/60">Loading map...</p>
+    </div>
+  )
+})
 
 type MarketSnapshot = {
   regionType: 'state' | 'city' | 'zip'

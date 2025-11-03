@@ -5,6 +5,13 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './tests',
+  /* Only run Playwright test files, exclude Vitest tests */
+  testMatch: /.*\.spec\.ts$/,
+  testIgnore: [
+    /.*\.test\.ts$/, // Exclude Vitest test files (.test.ts)
+    /.*\/api\/forms\.spec\.ts$/, // Exclude Vitest forms test (uses vitest)
+    /.*\/api\/rate-limit\.spec\.ts$/ // Exclude Vitest rate-limit test (uses vitest)
+  ],
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
