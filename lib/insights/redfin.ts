@@ -1,5 +1,7 @@
 import fs from 'fs/promises'
 import path from 'path'
+import { REDFIN_CONFIG } from '@/lib/config/data-sources'
+import { loadCacheWithMetadata, saveCacheWithMetadata } from '@/lib/data-pipeline/cache-manager'
 
 export type RedfinMarketSnapshot = {
   regionType: 'state' | 'city' | 'zip'
@@ -22,9 +24,8 @@ export type RedfinMarketSnapshot = {
   zip?: string
 }
 
-const CACHE_DIR =
-  process.env.REDFIN_CACHE_DIR ??
-  path.resolve(process.cwd(), '..', 'redfin-data', 'cache')
+// Use configuration from data-sources.ts
+const CACHE_DIR = REDFIN_CONFIG.cacheDir
 
 const CACHE_FILES = {
   state: 'state.json',
@@ -41,13 +42,32 @@ let zipCachePromise: Promise<SnapshotCache> | null = null
 
 async function loadCache(kind: CacheKind): Promise<SnapshotCache> {
   const filePath = path.join(CACHE_DIR, CACHE_FILES[kind])
+  
+  // Try to load with metadata and TTL checking
   try {
-    const raw = await fs.readFile(filePath, 'utf-8')
-    const parsed = JSON.parse(raw) as SnapshotCache
-    return parsed
-  } catch (error) {
-    console.error(`Failed to read Redfin ${kind} cache from ${filePath}`, error)
+    const result = await loadCacheWithMetadata<SnapshotCache>(filePath, {
+      ttlMs: REDFIN_CONFIG.ttlMs,
+      maxStalenessMs: REDFIN_CONFIG.maxStalenessMs,
+      version: REDFIN_CONFIG.version
+    })
+    
+    if (result) {
+      return result.data
+    }
+    
+    // Cache expired or doesn't exist
     return {}
+  } catch (error) {
+    // Fallback to legacy cache loading
+    try {
+      const raw = await fs.readFile(filePath, 'utf-8')
+      const parsed = JSON.parse(raw) as SnapshotCache
+      console.warn(`Loaded Redfin ${kind} cache without metadata (legacy format)`)
+      return parsed
+    } catch (legacyError) {
+      console.error(`Failed to read Redfin ${kind} cache from ${filePath}`, legacyError)
+      return {}
+    }
   }
 }
 

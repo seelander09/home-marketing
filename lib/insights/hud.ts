@@ -1,5 +1,9 @@
 ﻿import fs from 'fs/promises'
 import path from 'path'
+import { HUD_CONFIG } from '@/lib/config/data-sources'
+import { retryWithBackoff, fetchWithRetry } from '@/lib/data-pipeline/retry'
+import { createAPIFetchError, createNetworkError } from '@/lib/data-pipeline/errors'
+import { loadCacheWithMetadata, saveCacheWithMetadata } from '@/lib/data-pipeline/cache-manager'
 
 export type HUDMarketData = {
   regionType: 'state' | 'county' | 'metro'
@@ -48,9 +52,8 @@ export type HUDMarketData = {
   lastUpdated: string
 }
 
-const HUD_API_KEY = process.env.HUD_API_KEY || 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI2IiwianRpIjoiNWJiZGM0MDNjNzg2NjNkZjhhNzVlMGVjNDcxYjg1NzNhZjEyM2I2YTEyNjE0Nzk2NTFjNGRhYTg4OWY4NGIzNmEwNzM4ZjNjOWYwN2M1NWUiLCJpYXQiOjE3NjAzODU5NjIuMzgxMzAzLCJuYmYiOjE3NjAzODU5NjIuMzgxMzA4LCJleHAiOjIwNzU5MTg3NjIuMzc1MjIyLCJzdWIiOiIxMTExNTciLCJzY29wZXMiOltdfQ.UigsbK-IQmvA3_0tK9OHlWaylspqCQfvuCvPQ4cJAoL1i6xbMk2z4nhfXAr7GAfZhOeueneMfCXs9C0GSMtQhw'
-const HUD_API_BASE = 'https://www.huduser.gov/portal/api'
-const CACHE_DIR = path.resolve(process.cwd(), '..', 'hud-data', 'cache')
+// Use configuration from data-sources.ts
+const CACHE_DIR = HUD_CONFIG.cacheDir
 const SAMPLE_DIR = path.resolve(process.cwd(), 'content', 'mock-data', 'hud')
 
 type CacheKind = 'state' | 'county' | 'metro'
@@ -207,13 +210,32 @@ function getCacheKey(regionType: CacheKind, item: HUDApiPayload): string | null 
 
 async function loadCache(kind: CacheKind): Promise<HUDCache> {
   const filePath = path.join(CACHE_DIR, `${kind}.json`)
+  
+  // Try to load with metadata and TTL checking
   try {
-    const raw = await fs.readFile(filePath, 'utf-8')
-    const parsed = JSON.parse(raw) as HUDCache
-    return parsed
-  } catch (error) {
-    console.error(`Failed to read HUD ${kind} cache from ${filePath}`, error)
+    const result = await loadCacheWithMetadata<HUDCache>(filePath, {
+      ttlMs: HUD_CONFIG.ttlMs,
+      maxStalenessMs: HUD_CONFIG.maxStalenessMs,
+      version: HUD_CONFIG.version
+    })
+    
+    if (result) {
+      return result.data
+    }
+    
+    // Cache expired or doesn't exist
     return {}
+  } catch (error) {
+    // Fallback to legacy cache loading
+    try {
+      const raw = await fs.readFile(filePath, 'utf-8')
+      const parsed = JSON.parse(raw) as HUDCache
+      console.warn(`Loaded HUD ${kind} cache without metadata (legacy format)`)
+      return parsed
+    } catch (legacyError) {
+      console.error(`Failed to read HUD ${kind} cache from ${filePath}`, legacyError)
+      return {}
+    }
   }
 }
 
@@ -268,7 +290,11 @@ export async function buildHUDCache(): Promise<void> {
   await Promise.all(
     outputs.map(async ([filename, payload]) => {
       const target = path.join(CACHE_DIR, filename)
-      await fs.writeFile(target, JSON.stringify(payload, null, 2))
+      await saveCacheWithMetadata(target, payload, {
+        ttlMs: HUD_CONFIG.ttlMs,
+        maxStalenessMs: HUD_CONFIG.maxStalenessMs,
+        version: HUD_CONFIG.version
+      })
       console.log(`Wrote ${Object.keys(payload).length.toLocaleString()} records to ${target}`)
     })
   )

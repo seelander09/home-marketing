@@ -181,9 +181,41 @@ export function DemoRequestForm() {
     )
   }
 
+  const hasErrors = Object.keys(form.formState.errors).length > 0
+  const errorMessages = useMemo(() => {
+    const errors = form.formState.errors
+    const messages: string[] = []
+    if (errors.firstName) messages.push(`First name: ${errors.firstName.message}`)
+    if (errors.lastName) messages.push(`Last name: ${errors.lastName.message}`)
+    if (errors.email) messages.push(`Email: ${errors.email.message}`)
+    if (errors.phone) messages.push(`Phone: ${errors.phone.message}`)
+    if (errors.role) messages.push(`Role: ${errors.role.message}`)
+    if (errors.brokerage) messages.push(`Brokerage: ${errors.brokerage.message}`)
+    if (errors.territory?.city) messages.push(`City: ${errors.territory.city.message}`)
+    if (errors.territory?.state) messages.push(`State: ${errors.territory.state.message}`)
+    if (errors.territory?.zip) messages.push(`ZIP: ${errors.territory.zip.message}`)
+    if (errors.message) messages.push(`Message: ${errors.message.message}`)
+    return messages
+  }, [form.formState.errors])
+
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="rounded-3xl border border-brand-navy/10 bg-white p-8 shadow-card">
       <FormStepper steps={steps} current={step} />
+
+      {/* ARIA live region for form errors */}
+      <div
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+        role="alert"
+      >
+        {hasErrors && errorMessages.length > 0 && (
+          <div>
+            Form has {errorMessages.length} error{errorMessages.length !== 1 ? 's' : ''}: {errorMessages.join(', ')}
+          </div>
+        )}
+        {submitError && <div>Submission error: {submitError}</div>}
+      </div>
 
       <div className="mt-6 space-y-6">
         {step === 0 && (

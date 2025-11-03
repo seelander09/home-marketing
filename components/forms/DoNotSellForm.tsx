@@ -1,6 +1,6 @@
 ﻿"use client"
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { doNotSellSchema } from '@/lib/forms/schemas'
@@ -61,9 +61,20 @@ export function DoNotSellForm() {
     }
   }
 
+  const hasErrors = Object.keys(form.formState.errors).length > 0
+  const errorMessages = useMemo(() => {
+    const errors = form.formState.errors
+    const messages: string[] = []
+    if (errors.fullName) messages.push(`Full name: ${errors.fullName.message}`)
+    if (errors.email) messages.push(`Email: ${errors.email.message}`)
+    if (errors.phone) messages.push(`Phone: ${errors.phone.message}`)
+    if (errors.message) messages.push(`Message: ${errors.message.message}`)
+    return messages
+  }, [form.formState.errors])
+
   if (submitted) {
     return (
-      <div className="rounded-2xl border border-brand-navy/10 bg-white p-6 text-brand-navy">
+      <div className="rounded-2xl border border-brand-navy/10 bg-white p-6 text-brand-navy" role="alert" aria-live="polite">
         <h3 className="text-xl font-semibold">Request received</h3>
         <p className="mt-3 text-sm text-brand-navy/70">
           We have logged your Do Not Sell request. Our compliance team will confirm via email within 7 business days.
@@ -73,7 +84,21 @@ export function DoNotSellForm() {
   }
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" aria-label="Do Not Sell My Personal Information form">
+      {/* ARIA live region for form errors */}
+      <div
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+        role="alert"
+      >
+        {hasErrors && errorMessages.length > 0 && (
+          <div>
+            Form has {errorMessages.length} error{errorMessages.length !== 1 ? 's' : ''}: {errorMessages.join(', ')}
+          </div>
+        )}
+        {error && <div>Submission error: {error}</div>}
+      </div>
       <div>
         <label className="block text-sm font-semibold text-brand-navy">Full name</label>
         <Input {...form.register('fullName')} />

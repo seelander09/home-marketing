@@ -1,6 +1,6 @@
 ﻿"use client"
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { downloadRequestSchema } from '@/lib/forms/schemas'
@@ -74,8 +74,34 @@ export function GuideDownloadForm({ assetId }: { assetId: string }) {
     )
   }
 
+  const hasErrors = Object.keys(form.formState.errors).length > 0
+  const errorMessages = useMemo(() => {
+    const errors = form.formState.errors
+    const messages: string[] = []
+    if (errors.firstName) messages.push(`First name: ${errors.firstName.message}`)
+    if (errors.lastName) messages.push(`Last name: ${errors.lastName.message}`)
+    if (errors.email) messages.push(`Email: ${errors.email.message}`)
+    return messages
+  }, [form.formState.errors])
+
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" aria-label="Guide download form">
+      {/* ARIA live region for form errors */}
+      <div
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+        role="alert"
+      >
+        {hasErrors && errorMessages.length > 0 && (
+          <div>
+            Form has {errorMessages.length} error{errorMessages.length !== 1 ? 's' : ''}: {errorMessages.join(', ')}
+          </div>
+        )}
+        {error && <div>Submission error: {error}</div>}
+        {downloadUrl && <div>Download ready. Your guide is available for download.</div>}
+      </div>
+
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wide text-white/70">First name</label>

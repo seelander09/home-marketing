@@ -33,6 +33,7 @@
         "storybook": "storybook dev -p 6006",
         "build-storybook": "storybook build",
         "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+        "lighthouse:ci": "lhci autorun",
         "dev:start": "powershell -ExecutionPolicy Bypass -File scripts/dev/start-dev.ps1",
         "dev:stop": "powershell -ExecutionPolicy Bypass -File scripts/dev/stop-dev.ps1"
     },

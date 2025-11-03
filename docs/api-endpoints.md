@@ -277,10 +277,29 @@ All endpoints return consistent error responses:
 
 ## Rate Limits
 
+### External API Limits
+
 - **Census API**: 500 requests/day
 - **FRED API**: 120 requests/minute
 - **HUD API**: Varies by endpoint
 - **Redfin**: No limits (cached data)
+
+### Application Rate Limits
+
+The application implements rate limiting to protect API endpoints and ensure fair usage:
+
+- **Forms**: 5 requests per 15 minutes per IP
+- **General API**: 100 requests per minute per IP
+- **Market Data**: 30 requests per minute per IP
+- **Territory Lookup**: 20 requests per minute per IP
+
+Rate limit headers are included in responses:
+- `X-RateLimit-Limit`: Maximum requests allowed
+- `X-RateLimit-Remaining`: Remaining requests in current window
+- `X-RateLimit-Reset`: ISO timestamp when limit resets
+- `Retry-After`: Seconds to wait before retrying (when rate limited)
+
+When rate limited, endpoints return `429 Too Many Requests` with these headers.
 
 ## Caching
 

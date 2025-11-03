@@ -1,5 +1,9 @@
 ﻿import fs from 'fs/promises'
 import path from 'path'
+import { FRED_CONFIG } from '@/lib/config/data-sources'
+import { retryWithBackoff, fetchWithRetry } from '@/lib/data-pipeline/retry'
+import { createAPIFetchError, createNetworkError } from '@/lib/data-pipeline/errors'
+import { loadCacheWithMetadata, saveCacheWithMetadata } from '@/lib/data-pipeline/cache-manager'
 
 export type FREDEconomicData = {
   // Interest rates and financial indicators
@@ -44,9 +48,8 @@ export type FREDEconomicData = {
   lastUpdated: string
 }
 
-const FRED_API_KEY = process.env.FRED_API_KEY || '1329d932aae5ca43e09bf6fc9a4a308e'
-const FRED_API_BASE = 'https://api.stlouisfed.org/fred'
-const CACHE_DIR = path.resolve(process.cwd(), '..', 'fred-data', 'cache')
+// Use configuration from data-sources.ts
+const CACHE_DIR = FRED_CONFIG.cacheDir
 
 // FRED Series IDs for key economic indicators
 const FRED_SERIES = {
@@ -83,23 +86,27 @@ async function ensureCacheDir() {
 }
 
 async function fetchFREDSeries(seriesId: string): Promise<{ date: string; value: number } | null> {
-  if (!FRED_API_KEY) {
+  const apiKey = FRED_CONFIG.apiKey
+  if (!apiKey) {
     console.warn('FRED API key not provided')
     return null
   }
 
+  if (!FRED_CONFIG.enabled) {
+    console.warn('FRED data source is disabled')
+    return null
+  }
+
   try {
-    const url = `${FRED_API_BASE}/series/observations?series_id=${seriesId}&api_key=${FRED_API_KEY}&file_type=json&sort_order=desc&limit=1`
-    const response = await fetch(url, {
+    const url = `${FRED_CONFIG.apiBase}/series/observations?series_id=${seriesId}&api_key=${apiKey}&file_type=json&sort_order=desc&limit=1`
+    const response = await fetchWithRetry(url, {
       headers: {
         'User-Agent': FRED_USER_AGENT
       }
+    }, {
+      maxRetries: 3,
+      initialDelayMs: 1000
     })
-    
-    if (!response.ok) {
-      console.warn(`Failed to fetch FRED series ${seriesId}: ${response.status}`)
-      return null
-    }
 
     const data = await response.json()
     
@@ -170,13 +177,32 @@ async function fetchFREDData(): Promise<FREDEconomicData> {
 
 async function loadCache(): Promise<FREDEconomicData | null> {
   const filePath = path.join(CACHE_DIR, 'national.json')
+  
+  // Try to load with metadata and TTL checking
   try {
-    const raw = await fs.readFile(filePath, 'utf-8')
-    const parsed = JSON.parse(raw) as FREDEconomicData
-    return parsed
-  } catch (error) {
-    console.error(`Failed to read FRED cache from ${filePath}`, error)
+    const result = await loadCacheWithMetadata<FREDEconomicData>(filePath, {
+      ttlMs: FRED_CONFIG.ttlMs,
+      maxStalenessMs: FRED_CONFIG.maxStalenessMs,
+      version: FRED_CONFIG.version
+    })
+    
+    if (result) {
+      return result.data
+    }
+    
+    // Cache expired or doesn't exist
     return null
+  } catch (error) {
+    // Fallback to legacy cache loading
+    try {
+      const raw = await fs.readFile(filePath, 'utf-8')
+      const parsed = JSON.parse(raw) as FREDEconomicData
+      console.warn('Loaded FRED cache without metadata (legacy format)')
+      return parsed
+    } catch (legacyError) {
+      console.error(`Failed to read FRED cache from ${filePath}`, legacyError)
+      return null
+    }
   }
 }
 
@@ -203,7 +229,11 @@ export async function buildFREDCache(): Promise<void> {
   const economicData = await fetchFREDData()
 
   const target = path.join(CACHE_DIR, 'national.json')
-  await fs.writeFile(target, JSON.stringify(economicData, null, 2))
+  await saveCacheWithMetadata(target, economicData, {
+    ttlMs: FRED_CONFIG.ttlMs,
+    maxStalenessMs: FRED_CONFIG.maxStalenessMs,
+    version: FRED_CONFIG.version
+  })
   console.log(`Wrote FRED economic data to ${target}`)
 
   console.log('FRED cache build complete')

@@ -2,6 +2,11 @@ import { RedfinMarketSnapshot, getStateMarketSnapshot, getCityMarketSnapshot, ge
 import { CensusHousingData, getStateCensusData, getCountyCensusData, getZipCensusData } from './census'
 import { HUDMarketData, getStateHUDData, getCountyHUDData, getMetroHUDData } from './hud'
 import { FREDEconomicData, getFREDEconomicData } from './fred'
+import { dedupeRequest } from '@/lib/data-pipeline/request-dedup'
+import { recordTiming, MetricNames, incrementCounter } from '@/lib/data-pipeline/metrics'
+import { createLogger } from '@/lib/data-pipeline/logger'
+
+const logger = createLogger('unified-market-data')
 
 export type ComprehensiveMarketData = {
   // Core identification
@@ -205,60 +210,137 @@ function determineMarketHealth(
 }
 
 export async function getComprehensiveMarketData(request: MarketDataRequest): Promise<ComprehensiveMarketData | null> {
+  const startTime = Date.now()
   const { zip, city, state, county, metro, includeInsights = true } = request
   
-  // Determine region type and fetch appropriate data
+  logger.info('Fetching comprehensive market data', { zip, city, state, county, metro })
+  
+  // Determine region type and prepare fetch functions
   let regionType: ComprehensiveMarketData['regionType']
   let regionCode: string
   let regionName: string
   let stateCode = ''
   let stateName = ''
   
-  let redfin: RedfinMarketSnapshot | null = null
-  let census: CensusHousingData | null = null
-  let hud: HUDMarketData | null = null
-  let economic: FREDEconomicData | null = null
+  // Prepare parallel fetch promises
+  const fetchPromises: Array<() => Promise<unknown>> = []
+  const promiseLabels: string[] = []
   
   if (zip) {
     regionType = 'zip'
     regionCode = zip
     regionName = zip
-    redfin = await getZipMarketSnapshot(zip)
-    census = await getZipCensusData(zip)
+    const cacheKey = `redfin:zip:${zip}`
+    fetchPromises.push(() => dedupeRequest(cacheKey, () => getZipMarketSnapshot(zip)))
+    promiseLabels.push('redfin')
+    
+    const censusKey = `census:zip:${zip}`
+    fetchPromises.push(() => dedupeRequest(censusKey, () => getZipCensusData(zip)))
+    promiseLabels.push('census')
     // HUD and economic data don't have ZIP-level granularity
   } else if (city && state) {
     regionType = 'city'
     regionCode = `${state}|${city}`
     regionName = city
     stateCode = state
-    redfin = await getCityMarketSnapshot(state, city)
+    const cacheKey = `redfin:city:${state}:${city}`
+    fetchPromises.push(() => dedupeRequest(cacheKey, () => getCityMarketSnapshot(state, city)))
+    promiseLabels.push('redfin')
     // Census city data would need county lookup
   } else if (state) {
     regionType = 'state'
     regionCode = state
     regionName = state
     stateCode = state
-    redfin = await getStateMarketSnapshot(state)
-    census = await getStateCensusData(state)
-    hud = await getStateHUDData(state)
+    const redfinKey = `redfin:state:${state}`
+    fetchPromises.push(() => dedupeRequest(redfinKey, () => getStateMarketSnapshot(state)))
+    promiseLabels.push('redfin')
+    
+    const censusKey = `census:state:${state}`
+    fetchPromises.push(() => dedupeRequest(censusKey, () => getStateCensusData(state)))
+    promiseLabels.push('census')
+    
+    const hudKey = `hud:state:${state}`
+    fetchPromises.push(() => dedupeRequest(hudKey, () => getStateHUDData(state)))
+    promiseLabels.push('hud')
   } else if (county && state) {
     regionType = 'county'
     regionCode = `${state}|${county}`
     regionName = county
     stateCode = state
-    census = await getCountyCensusData(state, county)
-    hud = await getCountyHUDData(state, county)
+    const censusKey = `census:county:${state}:${county}`
+    fetchPromises.push(() => dedupeRequest(censusKey, () => getCountyCensusData(state, county)))
+    promiseLabels.push('census')
+    
+    const hudKey = `hud:county:${state}:${county}`
+    fetchPromises.push(() => dedupeRequest(hudKey, () => getCountyHUDData(state, county)))
+    promiseLabels.push('hud')
   } else if (metro) {
     regionType = 'metro'
     regionCode = metro
     regionName = metro
-    hud = await getMetroHUDData(metro)
+    const hudKey = `hud:metro:${metro}`
+    fetchPromises.push(() => dedupeRequest(hudKey, () => getMetroHUDData(metro)))
+    promiseLabels.push('hud')
   } else {
     return null
   }
   
-  // Fetch economic data (national level)
-  economic = await getFREDEconomicData()
+  // Always fetch economic data (national level) - use deduplication
+  const economicKey = 'fred:economic:national'
+  fetchPromises.push(() => dedupeRequest(economicKey, () => getFREDEconomicData()))
+  promiseLabels.push('economic')
+  
+  // Fetch all data sources in parallel with timeout
+  const timeoutMs = 10000 // 10 second timeout per source
+  const fetchWithTimeout = async (fn: () => Promise<unknown>, label: string) => {
+    const fetchStart = Date.now()
+    try {
+      const result = await Promise.race([
+        fn(),
+        new Promise<null>((_, reject) =>
+          setTimeout(() => reject(new Error(`Timeout after ${timeoutMs}ms`)), timeoutMs)
+        )
+      ])
+      const duration = Date.now() - fetchStart
+      recordTiming(`${MetricNames.API_LATENCY}.${label}`, duration)
+      incrementCounter(`${MetricNames.API_SUCCESS}.${label}`)
+      return { success: true as const, data: result, source: label }
+    } catch (error) {
+      const duration = Date.now() - fetchStart
+      recordTiming(`${MetricNames.API_LATENCY}.${label}`, duration)
+      incrementCounter(`${MetricNames.API_FAILURE}.${label}`)
+      logger.error(`Failed to fetch ${label} data`, error, { source: label })
+      return { success: false as const, error, source: label }
+    }
+  }
+  
+  // Execute all fetches in parallel
+  const results = await Promise.all(
+    fetchPromises.map((fn, index) => fetchWithTimeout(fn, promiseLabels[index]))
+  )
+  
+  // Extract results by source
+  let redfin: RedfinMarketSnapshot | null = null
+  let census: CensusHousingData | null = null
+  let hud: HUDMarketData | null = null
+  let economic: FREDEconomicData | null = null
+  
+  for (const result of results) {
+    if (result.success) {
+      if (result.source === 'redfin') {
+        redfin = result.data as RedfinMarketSnapshot | null
+      } else if (result.source === 'census') {
+        census = result.data as CensusHousingData | null
+      } else if (result.source === 'hud') {
+        hud = result.data as HUDMarketData | null
+      } else if (result.source === 'economic') {
+        economic = result.data as FREDEconomicData | null
+      }
+    } else {
+      logger.warn(`Failed to fetch ${result.source} data`, { error: result.error })
+    }
+  }
   
   // Calculate insights if requested
   let insights: ComprehensiveMarketData['insights'] = {
@@ -302,7 +384,7 @@ export async function getComprehensiveMarketData(request: MarketDataRequest): Pr
     })()
   }
   
-  return {
+  const result: ComprehensiveMarketData = {
     regionType,
     regionCode,
     regionName,
@@ -316,4 +398,22 @@ export async function getComprehensiveMarketData(request: MarketDataRequest): Pr
     dataFreshness,
     lastUpdated: new Date().toISOString()
   }
+
+  const duration = Date.now() - startTime
+  recordTiming(MetricNames.PIPELINE_DURATION, duration, { regionType, regionCode })
+  incrementCounter(MetricNames.PIPELINE_SUCCESS)
+  
+  logger.info('Comprehensive market data fetched', {
+    regionType,
+    regionCode,
+    duration,
+    sources: {
+      redfin: !!redfin,
+      census: !!census,
+      hud: !!hud,
+      economic: !!economic
+    }
+  })
+  
+  return result
 }

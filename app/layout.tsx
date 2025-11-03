@@ -9,6 +9,7 @@ import { CookieConsent } from '@/components/layout/CookieConsent'
 import { ExitIntentModal } from '@/components/layout/ExitIntentModal'
 import { ChatAssistant } from '@/components/layout/ChatAssistant'
 import { TagManager } from '@/components/layout/TagManager'
+import { SkipNavigation } from '@/components/layout/SkipNavigation'
 import { getConsentFromCookies } from '@/lib/analytics/consent'
 
 const nunito = Nunito({ subsets: ['latin'], variable: '--font-sans', display: 'swap' })
@@ -63,9 +64,10 @@ export default async function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${nunito.variable} ${plusJakarta.variable} bg-surface text-brand-midnight`}>
         <TagManager consent={consent} />
+        <SkipNavigation />
         <div className="flex min-h-screen flex-col">
           <Header navigation={navigation} cta={cta} />
-          <main className="flex-1 pt-24">{children}</main>
+          <main id="main-content" className="flex-1 pt-24" tabIndex={-1}>{children}</main>
           <Footer
             headline={settings.footer.headline}
             description={settings.footer.description}

@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server'
 import { getComprehensiveMarketData, MarketDataRequest } from '@/lib/insights/unified'
+import { rateLimiters, createRateLimitHeaders } from '@/lib/middleware/rate-limit'
+import { captureException, addBreadcrumb } from '@/lib/monitoring/error-tracker'
+import { measureApiCall } from '@/lib/monitoring/performance'
 
 type LocationPayload = Partial<Record<'zip' | 'city' | 'state' | 'county' | 'metro', string>>
 
@@ -28,26 +31,45 @@ function parseLocationPayload(value: unknown): LocationPayload | null {
 }
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url)
-  
-  // Extract query parameters
-  const zip = searchParams.get('zip')
-  const city = searchParams.get('city')
-  const state = searchParams.get('state')
-  const county = searchParams.get('county')
-  const metro = searchParams.get('metro')
-  const includeInsights = searchParams.get('includeInsights') !== 'false' // Default to true
-  
-  // Validate request parameters
-  if (!zip && !city && !state && !county && !metro) {
-    return NextResponse.json(
-      { 
-        error: 'Provide at least one location parameter: zip, city, state, county, or metro',
-        example: '/api/market/comprehensive?zip=12345&includeInsights=true'
-      }, 
-      { status: 400 }
-    )
-  }
+  try {
+    // Rate limiting
+    const rateLimit = await rateLimiters.marketData(request)
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded. Please try again later.' },
+        {
+          status: 429,
+          headers: createRateLimitHeaders(rateLimit.remaining, rateLimit.resetAt)
+        }
+      )
+    }
+
+    addBreadcrumb({
+      message: 'Market data request',
+      category: 'api.market.comprehensive',
+      level: 'info'
+    })
+
+    const { searchParams } = new URL(request.url)
+    
+    // Extract query parameters
+    const zip = searchParams.get('zip')
+    const city = searchParams.get('city')
+    const state = searchParams.get('state')
+    const county = searchParams.get('county')
+    const metro = searchParams.get('metro')
+    const includeInsights = searchParams.get('includeInsights') !== 'false' // Default to true
+    
+    // Validate request parameters
+    if (!zip && !city && !state && !county && !metro) {
+      return NextResponse.json(
+        { 
+          error: 'Provide at least one location parameter: zip, city, state, county, or metro',
+          example: '/api/market/comprehensive?zip=12345&includeInsights=true'
+        }, 
+        { status: 400 }
+      )
+    }
   
   // Validate state requirement for city queries
   if (city && !state) {
@@ -65,62 +87,99 @@ export async function GET(request: Request) {
     )
   }
 
-  try {
-    const marketDataRequest: MarketDataRequest = {
-      zip: zip || undefined,
-      city: city || undefined,
-      state: state || undefined,
-      county: county || undefined,
-      metro: metro || undefined,
-      includeInsights
-    }
-    
-    const comprehensiveData = await getComprehensiveMarketData(marketDataRequest)
-    
-    if (!comprehensiveData) {
-      return NextResponse.json(
-        { error: 'No market data found for the specified location' }, 
-        { status: 404 }
+    try {
+      const marketDataRequest: MarketDataRequest = {
+        zip: zip || undefined,
+        city: city || undefined,
+        state: state || undefined,
+        county: county || undefined,
+        metro: metro || undefined,
+        includeInsights
+      }
+      
+      const comprehensiveData = await measureApiCall('getComprehensiveMarketData', () =>
+        getComprehensiveMarketData(marketDataRequest)
       )
-    }
-    
-    // Add metadata about the request
-    const response = {
-      ...comprehensiveData,
-      metadata: {
-        request: marketDataRequest,
-        timestamp: new Date().toISOString(),
-        dataSources: {
-          redfin: !!comprehensiveData.redfin,
-          census: !!comprehensiveData.census,
-          hud: !!comprehensiveData.hud,
-          economic: !!comprehensiveData.economic
-        },
-        cacheStatus: {
-          redfin: comprehensiveData.dataFreshness.redfin ? 'cached' : 'missing',
-          census: comprehensiveData.dataFreshness.census ? 'cached' : 'missing',
-          hud: comprehensiveData.dataFreshness.hud ? 'cached' : 'missing',
-          economic: comprehensiveData.dataFreshness.economic ? 'cached' : 'missing'
+      
+      if (!comprehensiveData) {
+        return NextResponse.json(
+          { error: 'No market data found for the specified location' }, 
+          { status: 404 }
+        )
+      }
+      
+      // Add metadata about the request
+      const response = {
+        ...comprehensiveData,
+        metadata: {
+          request: marketDataRequest,
+          timestamp: new Date().toISOString(),
+          dataSources: {
+            redfin: !!comprehensiveData.redfin,
+            census: !!comprehensiveData.census,
+            hud: !!comprehensiveData.hud,
+            economic: !!comprehensiveData.economic
+          },
+          cacheStatus: {
+            redfin: comprehensiveData.dataFreshness.redfin ? 'cached' : 'missing',
+            census: comprehensiveData.dataFreshness.census ? 'cached' : 'missing',
+            hud: comprehensiveData.dataFreshness.hud ? 'cached' : 'missing',
+            economic: comprehensiveData.dataFreshness.economic ? 'cached' : 'missing'
+          }
         }
       }
+      
+      return NextResponse.json(response, {
+        headers: createRateLimitHeaders(rateLimit.remaining, rateLimit.resetAt)
+      })
+      
+    } catch (error) {
+      captureException(error instanceof Error ? error : new Error(String(error)), {
+        component: 'api.market.comprehensive',
+        action: 'GET',
+        url: request.url,
+        zip,
+        city,
+        state
+      })
+      return NextResponse.json(
+        { 
+          error: 'Unable to load comprehensive market data',
+          details: error instanceof Error ? error.message : 'Unknown error'
+        }, 
+        { status: 500 }
+      )
     }
-    
-    return NextResponse.json(response)
-    
   } catch (error) {
-    console.error('Failed to fetch comprehensive market data:', error)
-    return NextResponse.json(
-      { 
-        error: 'Unable to load comprehensive market data',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      }, 
-      { status: 500 }
-    )
+    captureException(error instanceof Error ? error : new Error(String(error)), {
+      component: 'api.market.comprehensive',
+      action: 'GET',
+      url: request.url
+    })
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
 export async function POST(request: Request) {
   try {
+    // Rate limiting for batch requests
+    const rateLimit = await rateLimiters.marketData(request)
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded. Please try again later.' },
+        {
+          status: 429,
+          headers: createRateLimitHeaders(rateLimit.remaining, rateLimit.resetAt)
+        }
+      )
+    }
+
+    addBreadcrumb({
+      message: 'Batch market data request',
+      category: 'api.market.comprehensive',
+      level: 'info'
+    })
+
     const body = await request.json()
     const includeInsights =
       typeof body?.includeInsights === 'boolean' ? body.includeInsights : true
@@ -166,13 +225,20 @@ export async function POST(request: Request) {
         }
         
         try {
-          const data = await getComprehensiveMarketData(marketDataRequest)
+          const data = await measureApiCall(`getComprehensiveMarketData.batch.${location.zip || location.city || location.state}`, () =>
+            getComprehensiveMarketData(marketDataRequest)
+          )
           return {
             location,
             data,
             success: true
           }
         } catch (error) {
+          captureException(error instanceof Error ? error : new Error(String(error)), {
+            component: 'api.market.comprehensive',
+            action: 'POST.batch',
+            location
+          })
           return {
             location,
             data: null,
@@ -194,10 +260,16 @@ export async function POST(request: Request) {
         failed,
         timestamp: new Date().toISOString()
       }
+    }, {
+      headers: createRateLimitHeaders(rateLimit.remaining, rateLimit.resetAt)
     })
     
   } catch (error) {
-    console.error('Failed to process batch market data request:', error)
+    captureException(error instanceof Error ? error : new Error(String(error)), {
+      component: 'api.market.comprehensive',
+      action: 'POST',
+      url: request.url
+    })
     return NextResponse.json(
       { 
         error: 'Unable to process batch request',

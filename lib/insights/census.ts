@@ -1,5 +1,9 @@
 ﻿import fs from 'fs/promises'
 import path from 'path'
+import { CENSUS_CONFIG, CENSUS_ACS_YEAR } from '@/lib/config/data-sources'
+import { retryWithBackoff, fetchWithRetry } from '@/lib/data-pipeline/retry'
+import { createAPIFetchError, createNetworkError } from '@/lib/data-pipeline/errors'
+import { loadCacheWithMetadata, saveCacheWithMetadata, getCacheStatus } from '@/lib/data-pipeline/cache-manager'
 
 export type CensusDemographics = {
   totalPopulation: number | null
@@ -43,9 +47,8 @@ export type CensusHousingData = {
   demographics?: CensusDemographics
 }
 
-const CENSUS_API_KEY = process.env.CENSUS_API_KEY || '676987a71483dae833c0d8e3d732f8f2add95f88'
-const CENSUS_API_BASE = 'https://api.census.gov/data'
-const CACHE_DIR = path.resolve(process.cwd(), '..', 'census-data', 'cache')
+// Use configuration from data-sources.ts
+const CACHE_DIR = CENSUS_CONFIG.cacheDir
 
 // ACS 5-Year Estimates Variables
 const ACS_VARIABLES: Record<string, string> = {
@@ -204,27 +207,33 @@ function buildCensusSnapshot(row: Record<string, string>, regionType: CacheKind)
 }
 
 async function fetchCensusData(regionType: CacheKind): Promise<CensusCache> {
-  if (!CENSUS_API_KEY) {
+  const apiKey = CENSUS_CONFIG.apiKey
+  if (!apiKey) {
     console.warn('Census API key not provided, returning empty cache')
     return {}
   }
 
-  const year = '2022' // Latest 5-year ACS data
+  if (!CENSUS_CONFIG.enabled) {
+    console.warn('Census data source is disabled')
+    return {}
+  }
+
+  const year = CENSUS_ACS_YEAR
   const variables = Object.keys(ACS_VARIABLES).join(',')
   
   let url: string
   switch (regionType) {
     case 'state':
-      url = `${CENSUS_API_BASE}/${year}/acs/acs5?get=NAME,${variables}&for=state:*&key=${CENSUS_API_KEY}`
+      url = `${CENSUS_CONFIG.apiBase}/${year}/acs/acs5?get=NAME,${variables}&for=state:*&key=${apiKey}`
       break
     case 'county':
-      url = `${CENSUS_API_BASE}/${year}/acs/acs5?get=NAME,${variables}&for=county:*&in=state:*&key=${CENSUS_API_KEY}`
+      url = `${CENSUS_CONFIG.apiBase}/${year}/acs/acs5?get=NAME,${variables}&for=county:*&in=state:*&key=${apiKey}`
       break
     case 'place':
-      url = `${CENSUS_API_BASE}/${year}/acs/acs5?get=NAME,${variables}&for=place:*&in=state:*&key=${CENSUS_API_KEY}`
+      url = `${CENSUS_CONFIG.apiBase}/${year}/acs/acs5?get=NAME,${variables}&for=place:*&in=state:*&key=${apiKey}`
       break
     case 'zip':
-      url = `${CENSUS_API_BASE}/${year}/acs/acs5?get=NAME,${variables}&for=zip%20code%20tabulation%20area:*&key=${CENSUS_API_KEY}`
+      url = `${CENSUS_CONFIG.apiBase}/${year}/acs/acs5?get=NAME,${variables}&for=zip%20code%20tabulation%20area:*&key=${apiKey}`
       break
     default:
       throw new Error(`Unsupported region type: ${regionType}`)
@@ -232,11 +241,14 @@ async function fetchCensusData(regionType: CacheKind): Promise<CensusCache> {
 
   try {
     console.log(`Fetching Census ${regionType} data...`)
-    const response = await fetch(url)
-    
-    if (!response.ok) {
-      throw new Error(`Census API responded with ${response.status}: ${response.statusText}`)
-    }
+    const response = await fetchWithRetry(url, {
+      headers: {
+        'User-Agent': 'home-marketing/1.0 (+https://example.com)'
+      }
+    }, {
+      maxRetries: 3,
+      initialDelayMs: 1000
+    })
 
     const data = await response.json()
     
@@ -270,6 +282,7 @@ async function fetchCensusData(regionType: CacheKind): Promise<CensusCache> {
     
   } catch (error) {
     console.error(`Failed to fetch Census ${regionType} data:`, error)
+    // Try to load from cache as fallback
     try {
       const cached = await loadCache(regionType)
       if (Object.keys(cached).length > 0) {
@@ -300,13 +313,32 @@ function getCacheKey(regionType: CacheKind, row: Record<string, string>): string
 
 async function loadCache(kind: CacheKind): Promise<CensusCache> {
   const filePath = path.join(CACHE_DIR, `${kind}.json`)
+  
+  // Try to load with metadata and TTL checking
   try {
-    const raw = await fs.readFile(filePath, 'utf-8')
-    const parsed = JSON.parse(raw) as CensusCache
-    return parsed
-  } catch (error) {
-    console.error(`Failed to read Census ${kind} cache from ${filePath}`, error)
+    const result = await loadCacheWithMetadata<CensusCache>(filePath, {
+      ttlMs: CENSUS_CONFIG.ttlMs,
+      maxStalenessMs: CENSUS_CONFIG.maxStalenessMs,
+      version: CENSUS_CONFIG.version
+    })
+    
+    if (result) {
+      return result.data
+    }
+    
+    // Cache expired or doesn't exist - return empty to trigger refresh
     return {}
+  } catch (error) {
+    // Fallback to legacy cache loading (no metadata)
+    try {
+      const raw = await fs.readFile(filePath, 'utf-8')
+      const parsed = JSON.parse(raw) as CensusCache
+      console.warn(`Loaded Census ${kind} cache without metadata (legacy format)`)
+      return parsed
+    } catch (legacyError) {
+      console.error(`Failed to read Census ${kind} cache from ${filePath}`, legacyError)
+      return {}
+    }
   }
 }
 
@@ -372,7 +404,11 @@ export async function buildCensusCache(): Promise<void> {
   await Promise.all(
     outputs.map(async ([filename, payload]) => {
       const target = path.join(CACHE_DIR, filename)
-      await fs.writeFile(target, JSON.stringify(payload, null, 2))
+      await saveCacheWithMetadata(target, payload, {
+        ttlMs: CENSUS_CONFIG.ttlMs,
+        maxStalenessMs: CENSUS_CONFIG.maxStalenessMs,
+        version: CENSUS_CONFIG.version
+      })
       console.log(`Wrote ${Object.keys(payload).length.toLocaleString()} records to ${target}`)
     })
   )
