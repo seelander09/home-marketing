@@ -74,7 +74,7 @@ export async function GET() {
   }
 
   if (configuredApis === 0) {
-    overallStatus = overallStatus === 'unhealthy' ? 'unhealthy' : 'degraded'
+    overallStatus = 'degraded'
   }
 
   // Check disk space (basic check)
@@ -108,7 +108,9 @@ export async function GET() {
         ageDays: ageDays ?? undefined
       }
       if (censusStatus.expired || censusStatus.stale) {
-        overallStatus = overallStatus === 'unhealthy' ? 'unhealthy' : 'degraded'
+        if (overallStatus === 'healthy') {
+          overallStatus = 'degraded'
+        }
       }
     } else {
       checks.dataSources.census = {
@@ -138,7 +140,9 @@ export async function GET() {
         ageDays: ageDays ?? undefined
       }
       if (fredStatus.expired || fredStatus.stale) {
-        overallStatus = overallStatus === 'unhealthy' ? 'unhealthy' : 'degraded'
+        if (overallStatus === 'healthy') {
+          overallStatus = 'degraded'
+        }
       }
     } else {
       checks.dataSources.fred = {
@@ -168,7 +172,9 @@ export async function GET() {
         ageDays: ageDays ?? undefined
       }
       if (hudStatus.expired || hudStatus.stale) {
-        overallStatus = overallStatus === 'unhealthy' ? 'unhealthy' : 'degraded'
+        if (overallStatus === 'healthy') {
+          overallStatus = 'degraded'
+        }
       }
     } else {
       checks.dataSources.hud = {
@@ -198,7 +204,9 @@ export async function GET() {
         ageDays: ageDays ?? undefined
       }
       if (redfinStatus.expired || redfinStatus.stale) {
-        overallStatus = overallStatus === 'unhealthy' ? 'unhealthy' : 'degraded'
+        if (overallStatus === 'healthy') {
+          overallStatus = 'degraded'
+        }
       }
     } else {
       checks.dataSources.redfin = {
@@ -218,14 +226,19 @@ export async function GET() {
     if (typeof check === 'object' && check !== null) {
       if ('status' in check && check.status === 'error') return true
       if ('dataSources' in check && check.dataSources) {
-        return Object.values(check.dataSources).some((ds: any) => ds?.status === 'error')
+        return Object.values(check.dataSources).some((ds: any) => {
+          const status = ds?.status
+          return status === 'error' || status === 'expired'
+        })
       }
     }
     return false
   })
   
-  if (hasErrors && overallStatus === 'healthy') {
-    overallStatus = 'degraded'
+  if (hasErrors) {
+    if (overallStatus === 'healthy') {
+      overallStatus = 'degraded'
+    }
   }
 
   const result: HealthCheckResult = {

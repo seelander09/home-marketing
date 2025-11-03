@@ -179,7 +179,8 @@ export async function saveCacheWithMetadata<T>(
       fs.writeFile(getMetadataPath(cachePath), JSON.stringify(metadata, null, 2))
     ])
   } catch (error) {
-    throw new Error(`Failed to save cache: ${cachePath}`, { cause: error })
+    const err = new Error(`Failed to save cache: ${cachePath}${error instanceof Error ? `: ${error.message}` : ''}`)
+    throw err
   }
 }
 
@@ -200,7 +201,8 @@ export async function deleteCache(cachePath: string): Promise<void> {
       fs.unlink(getMetadataPath(cachePath)).catch(() => {}) // Ignore if doesn't exist
     ])
   } catch (error) {
-    throw new Error(`Failed to delete cache: ${cachePath}`, { cause: error })
+    const err = new Error(`Failed to delete cache: ${cachePath}${error instanceof Error ? `: ${error.message}` : ''}`)
+    throw err
   }
 }
 

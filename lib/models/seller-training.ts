@@ -787,11 +787,52 @@ export function projectFeaturesWithModel(
   }
 
   const vector = property.sellerFeatures
-  if (vector.featureNames.length !== model.featureNames.length) {
-    return null
+  
+  // Handle backward/forward compatibility: match features by name or pad/truncate
+  let featureValues: number[]
+  
+  // First, try to match by feature names (handles reordering)
+  const modelFeatureIndex = new Map(model.featureNames.map((name, idx) => [name, idx]))
+  const hasNameMatches = vector.featureNames.some(name => modelFeatureIndex.has(name))
+  
+  if (hasNameMatches && vector.featureNames.length !== model.featureNames.length) {
+    // Match by name if possible (handles feature additions/removals)
+    featureValues = new Array(model.featureNames.length).fill(0)
+    for (let i = 0; i < vector.featureNames.length; i++) {
+      const featureName = vector.featureNames[i]
+      const modelIdx = modelFeatureIndex.get(featureName)
+      if (modelIdx !== undefined && i < vector.values.length) {
+        featureValues[modelIdx] = vector.values[i] ?? 0
+      }
+    }
+  } else if (vector.featureNames.length < model.featureNames.length) {
+    // Pad with zeros for missing features (backward compatibility)
+    featureValues = [...vector.values]
+    while (featureValues.length < model.featureNames.length) {
+      featureValues.push(0)
+    }
+  } else if (vector.featureNames.length > model.featureNames.length) {
+    // Truncate if vector has more features than model expects
+    featureValues = vector.values.slice(0, model.featureNames.length)
+  } else {
+    // Lengths match - use as-is (but verify names match for safety)
+    if (vector.featureNames.length === model.featureNames.length &&
+        vector.featureNames.every((name, idx) => name === model.featureNames[idx])) {
+      featureValues = vector.values
+    } else {
+      // Names don't match but lengths do - remap by name
+      featureValues = new Array(model.featureNames.length).fill(0)
+      for (let i = 0; i < vector.featureNames.length; i++) {
+        const featureName = vector.featureNames[i]
+        const modelIdx = modelFeatureIndex.get(featureName)
+        if (modelIdx !== undefined && i < vector.values.length) {
+          featureValues[modelIdx] = vector.values[i] ?? 0
+        }
+      }
+    }
   }
 
-  const probability = predictProbabilityFromFeatures(model, vector.values)
+  const probability = predictProbabilityFromFeatures(model, featureValues)
 
   return {
     probability,

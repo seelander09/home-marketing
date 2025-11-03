@@ -66,9 +66,9 @@ export function validateRelationship(
 ): boolean {
   if (!expectedSum || expectedSum === 0) return true
   
-  const sum = values.reduce((acc, val) => acc + (val || 0), 0)
-  const diff = Math.abs(sum - expectedSum)
-  const percentDiff = diff / expectedSum
+  const sum = values.reduce((acc: number, val) => (acc || 0) + (val || 0), 0)
+  const diff = Math.abs(sum - (expectedSum || 0))
+  const percentDiff = expectedSum ? diff / expectedSum : 0
   
   return percentDiff <= tolerance
 }

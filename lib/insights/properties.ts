@@ -139,7 +139,17 @@ const propertiesDataset: PropertyOpportunity[] = (data as PropertyOpportunity[])
     engagementMultiChannelScore:
       engagementSummary?.multiChannelScore ?? digitalEngagementScore ?? null,
     eventsLast90Days: engagementSummary?.eventsLast90Days ?? undefined,
-    ownershipDurationYears: transactionSummary?.ownershipDurationYears ?? derivedYearsInHome
+    ownershipDurationYears: transactionSummary?.ownershipDurationYears ?? derivedYearsInHome,
+    property: {
+      id: property.id,
+      lastSaleDate: property.lastSaleDate ?? transactionSummary?.lastSaleDate,
+      lastListingDate: property.lastListingDate ?? listingSummary?.lastListedDate,
+      propertyTaxAnnual: property.propertyTaxAnnual ?? null,
+      assessedValue: property.assessedValue
+    },
+    engagementActivity: engagementSummary ? {
+      lastEngagedAt: engagementSummary.lastEngagedAt ?? undefined
+    } : undefined
   })
 
   const lastSaleDate = property.lastSaleDate ?? transactionSummary?.lastSaleDate

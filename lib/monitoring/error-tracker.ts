@@ -73,11 +73,24 @@ class ConsoleErrorTracker implements ErrorTracker {
 }
 
 class SentryErrorTracker implements ErrorTracker {
-  private sentry: typeof import('@sentry/nextjs') | null = null
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private sentry: any = null
 
   async init(options?: { dsn?: string; environment?: string }) {
     try {
-      const sentryModule = await import('@sentry/nextjs')
+      // Dynamic import with error handling for optional Sentry dependency
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let sentryModule: any = null
+      try {
+        sentryModule = await import('@sentry/nextjs')
+      } catch {
+        // Sentry not installed, will fall back to console
+        return
+      }
+      
+      if (!sentryModule) {
+        return
+      }
       this.sentry = sentryModule
 
       if (options?.dsn) {
@@ -85,7 +98,8 @@ class SentryErrorTracker implements ErrorTracker {
           dsn: options.dsn,
           environment: options.environment || process.env.NODE_ENV,
           tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
-          beforeSend(event, hint) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          beforeSend(event: any, hint: any) {
             if (process.env.NODE_ENV === 'development') {
               console.error('Sentry event:', event, hint)
             }
@@ -95,7 +109,7 @@ class SentryErrorTracker implements ErrorTracker {
       }
     } catch (error) {
       console.warn('Failed to initialize Sentry, falling back to console:', error)
-      return new ConsoleErrorTracker()
+      // Return new console tracker on init failure
     }
   }
 
@@ -156,8 +170,13 @@ export function initErrorTracking(options?: { dsn?: string; environment?: string
   const dsn = options?.dsn || process.env.NEXT_PUBLIC_SENTRY_DSN
 
   if (dsn && typeof window === 'undefined') {
-    trackerInstance = new SentryErrorTracker()
-    trackerInstance.init({ dsn, environment: options?.environment })
+    const sentryTracker = new SentryErrorTracker()
+    sentryTracker.init({ dsn, environment: options?.environment }).catch(() => {
+      // Fallback to console if Sentry init fails
+      trackerInstance = new ConsoleErrorTracker()
+      trackerInstance.init(options)
+    })
+    trackerInstance = sentryTracker
   } else {
     trackerInstance = new ConsoleErrorTracker()
     trackerInstance.init(options)

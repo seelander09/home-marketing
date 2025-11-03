@@ -698,7 +698,52 @@ export async function scorePropertyOpportunity(
 
   const activeModel = modelWeights ?? (await getSellerModelWeights())
   if (activeModel) {
-    const projection = projectFeaturesWithModel(property, activeModel)
+    // Rebuild features with marketData if available (for models that support extended features)
+    let featureVector = property.sellerFeatures
+    if (marketData && featureVector) {
+      // If model has more features than current vector, rebuild with marketData
+      const expectedFeatureCount = activeModel.featureNames.length
+      if (featureVector.featureNames.length < expectedFeatureCount) {
+        const { buildSellerFeatureVector } = await import('@/lib/insights/seller-signals')
+        featureVector = buildSellerFeatureVector({
+          marketValue: property.marketValue,
+          estimatedEquity: property.estimatedEquity,
+          loanBalance: property.loanBalance,
+          yearsInHome: property.yearsInHome,
+          householdIncomeBand: property.householdIncomeBand,
+          monthlyMortgagePayment: property.monthlyMortgagePayment,
+          digitalEngagementScore: property.digitalEngagementScore ?? null,
+          neighborsListed12Months: property.neighborsListed12Months ?? null,
+          lifeEventSignals: property.lifeEventSignals,
+          recentListingCount: property.listingActivity?.listingsPast12Months,
+          averageDaysOnMarket: property.listingActivity?.averageDaysOnMarket ?? null,
+          transactionRecencyMonths: property.transactionSummary?.transactionRecencyMonths ?? null,
+          refinanceCount36m: property.transactionSummary?.refinanceCount36m ?? 0,
+          highIntentEngagement30d: property.engagementActivity?.highIntentEvents30Days ?? 0,
+          engagementMultiChannelScore: property.engagementActivity?.multiChannelScore ?? property.digitalEngagementScore ?? null,
+          eventsLast90Days: property.engagementActivity?.eventsLast90Days,
+          ownershipDurationYears: property.transactionSummary?.ownershipDurationYears ?? property.yearsInHome,
+          listingScore: property.listingScore,
+          equityUpside: property.equityUpside,
+          ownerAge: property.ownerAge ?? null,
+          sellerOutcome: property.sellerOutcome,
+          sellerSignals: property.sellerSignals,
+          marketData,
+          property: {
+            id: property.id,
+            lastSaleDate: property.lastSaleDate,
+            lastListingDate: property.lastListingDate,
+            propertyTaxAnnual: property.propertyTaxAnnual ?? null,
+            assessedValue: property.assessedValue
+          },
+          engagementActivity: property.engagementActivity
+        })
+      }
+    }
+    
+    // Use enhanced feature vector if available
+    const propertyWithFeatures = featureVector ? { ...property, sellerFeatures: featureVector } : property
+    const projection = projectFeaturesWithModel(propertyWithFeatures, activeModel)
     if (projection) {
       modelScoreValue = projection.probability * 100
       const auc = activeModel.metrics?.auc ?? 0.5
